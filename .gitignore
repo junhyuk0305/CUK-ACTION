@@ -1,0 +1,24 @@
+node_modules/
+dist/
+dist-check/
+*.log
+.env*
+!.env.example
+*.png
+
+# Local work and generated files
+tmp/
+_ref/
+.openai/
+supabase/.temp/
+supabase/.branches/
+
+# Review material excluded from the public repository.
+# The private history already tracks these paths. These rules keep them out of a fresh public repository.
+docs/goldset/
+docs/CORE-VALIDATION-RESULTS.md
+docs/NOTICE-GOLDSET.md
+docs/NOTICE-REVIEW.md
+docs/OFFLINE-WORKFLOW.md
+docs/USER-VALIDATION.md
+src/core-validation.source.test.js

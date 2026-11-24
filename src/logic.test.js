@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluate,conditions,daysLeft,progress,metrics} from './logic.js';
+import {notices,initialProfile,demoProfile} from './data.js';
+test('missing data remains unknown, zero is a real failing value',()=>{const r={field:'gpa',op:'min',value:3}; assert.equal(evaluate(r,{}),'unknown');assert.equal(evaluate(r,{gpa:''}),'unknown');assert.equal(evaluate(r,{gpa:0}),'fail');assert.equal(evaluate(r,{gpa:3}),'pass');});
+test('eligibility is independent of preparation',()=>{assert.equal(conditions(notices[0],demoProfile).pass,3);assert.equal(progress(notices[0],{}).done,0);assert.equal(conditions(notices[0],initialProfile).unknown,3);});
+test('Korean date handles midnight and expired deadlines',()=>{assert.equal(daysLeft('2026-11-11',new Date('2026-11-10T15:01:00Z')),0);assert.equal(daysLeft('2026-11-10',new Date('2026-11-10T15:01:00Z')),-1);});
+test('links never count as completed and repeated views deduplicate',()=>{assert.deepEqual(metrics([{notice:'x',type:'link',visitor:'a'},{notice:'x',type:'view',visitor:'a'},{notice:'x',type:'view',visitor:'a'}],'x'),[1,0,0,0,1]);});
+test('manual evidence cannot be self-certified by profile values',()=>{assert.equal(evaluate({field:'manual',op:'eq',value:'확인'},{manual:'확인'}),'unknown');});
+test('non-numeric or whitespace information requires confirmation',()=>{assert.equal(evaluate({field:'gpa',op:'min',value:3},{gpa:'invalid'}),'unknown');assert.equal(evaluate({field:'gpa',op:'min',value:3},{gpa:' '}),'unknown');});

@@ -1,0 +1,80 @@
+:root {
+  --motion-press: 90ms;
+  --motion-feedback: 160ms;
+  --motion-enter: 240ms;
+  --motion-reveal: 360ms;
+  --motion-ease: cubic-bezier(.2,.75,.25,1);
+}
+@keyframes enter-panel {
+  from { opacity: 0; translate: 0 6px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes reveal-chart {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes grow-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes enter-menu {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button, .button, .notice-card, .archive-list a,
+  .bar nav :is(a, button), .chips button, .feature-link, .pager button, .mark,
+  .more, .reset, .actions > *, .search, .back, .rows .row,
+  .bundle-grid > button, .overview-kpi, .overview-due, .overview-review-action {
+    transition-property: background-color, border-color, color, box-shadow, scale;
+    transition-duration: var(--motion-feedback), var(--motion-feedback), var(--motion-feedback), var(--motion-feedback), var(--motion-press);
+    transition-timing-function: var(--motion-ease);
+  }
+  :is(button, .button, .feature-link, .actions > a):active:not(:disabled):not([aria-disabled=true]) {
+    scale: .97;
+  }
+  .detail { animation: enter-panel var(--motion-enter) var(--motion-ease); }
+  .feature[data-direction="1"] { --slide-from: 14px; }
+  .feature[data-direction="-1"] { --slide-from: -14px; }
+  .feature:not([data-direction="0"]) .feature-story,
+  .feature:not([data-direction="0"]) .feature-photo img {
+    animation: feature-arrive var(--motion-enter) var(--motion-ease);
+  }
+  .mark svg, .actions .secondary svg { transition: scale var(--motion-feedback) var(--motion-ease); }
+  .destination svg, .feature-link svg, .back svg {
+    transition: transform var(--motion-feedback) var(--motion-ease);
+  }
+  .search:focus-within { box-shadow: 0 0 0 4px #5186e724; }
+  .overview-notice-detail, .manager-editor-heading, .manager-metrics,
+  .detail-layout, .preparation-gate, .modal, .toast, .success-note, .warning {
+    animation: enter-panel var(--motion-enter) var(--motion-ease);
+  }
+  .overview-plot svg { animation: reveal-chart var(--motion-reveal) var(--motion-ease); }
+  .overview-stage-track i { transform-origin: left; animation: grow-bar var(--motion-reveal) var(--motion-ease); }
+  .progress-track i { transition: width var(--motion-enter) var(--motion-ease); }
+  .checklist input { transition: box-shadow var(--motion-feedback) var(--motion-ease); }
+  .checklist input:checked { box-shadow: 0 0 0 3px var(--soft); }
+}
+@media (max-width: 680px) and (prefers-reduced-motion: no-preference) {
+  .sidebar.open { animation: enter-menu var(--motion-enter) var(--motion-ease); }
+  .menu-backdrop { animation: enter-panel var(--motion-enter) var(--motion-ease); }
+}
+@keyframes feature-arrive {
+  from { opacity: .35; transform: translateX(var(--slide-from)); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .chips button:not([aria-pressed=true]):hover, .more:hover, .mark:hover, .reset:hover, .actions .secondary:hover { background: var(--pale); }
+  .pager button:hover { background: #ffffff24; border-radius: 50%; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .row-link:hover .destination svg, .feature-link:hover svg { transform: translateX(3px); }
+  .row-link[target=_blank]:hover .destination svg { transform: translate(2px,-2px); }
+  .actions a[target=_blank] svg { transition: transform var(--motion-feedback) var(--motion-ease); }
+  .actions a[target=_blank]:hover svg { transform: translate(2px,-2px); }
+  .back:hover svg { transform: translateX(-3px); }
+}
+.mark[aria-pressed=true] svg, .actions .secondary[aria-pressed=true] svg { fill: currentColor; scale: 1.12; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
