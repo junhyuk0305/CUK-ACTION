@@ -5,6 +5,7 @@ import Featured from './Featured.jsx';
 import {DEMO} from './demo.js';
 import GuideDetail from './GuideDetail.jsx';
 import {readGuide} from './gateway.js';
+import {loadArchive} from './archive.js';
 import {initialGuide,schedules} from './guide.js';
 import './campus.css';
 import './motion.css';
@@ -17,11 +18,6 @@ function readSaved() {
   if (!['test-student-a','test-student-b'].includes(account)) return [];
   const legacy = JSON.parse(localStorage.getItem('cuk-action-test-v2') || '{}');
   return (legacy.students?.[account]?.saved || []).map(String).filter(id => /^\d+$/.test(id));
-}
-async function fetchJSON(file) {
-  const response = await fetch('/' + file, {cache:'no-cache'});
-  if (!response.ok) throw Error();
-  return response.json();
 }
 function previousDrafts() {
   if (!DEMO) return '';
@@ -63,8 +59,8 @@ function App() {
   const {q:query, category, dept}=filters;
   useEffect(()=>{
     let active=true;
-    Promise.all([fetchJSON('archive.json'),fetchJSON('ai-excerpts.json')]).then(([rows,excerpts])=>{
-      if(active)setData({rows:rows.sort((a,b)=>b.date.localeCompare(a.date)||Number(b.id)-Number(a.id)),excerpts});
+    loadArchive().then(rows=>{
+      if(active)setData({rows:[...rows].sort((a,b)=>b.date.localeCompare(a.date)||Number(b.id)-Number(a.id)),excerpts:Object.fromEntries(rows.filter(r=>r.excerpt).map(r=>[r.id,r.excerpt]))});
     }).catch(()=>{if(active)setError(true)});
     return ()=>{active=false};
   },[attempt]);

@@ -119,7 +119,7 @@ python scripts/check_schedule_reads.py
 
 ## 본선 공고 데이터
 
-검색 목록은 `/archive.json`에서 제공합니다. AI 입력은 `/ai-excerpts.json`의 공고번호별 발췌문으로 제한합니다. 375건의 원문 안내 공고는 이 파일에 없습니다. 실시간 모델 호출은 아직 연결하지 않았습니다.
+공고는 Supabase `notices` 표 한 곳에서 관리합니다. 홈과 계정 화면은 게시 공고(`status = 'published'`)를 읽습니다. 비로그인 방문자는 게시 공고의 `id`, `status`, `data`만 읽을 수 있습니다. AI 입력은 게시 공고의 `data.excerpt`(본문 발췌)로 제한합니다. 발췌가 없는 공고는 원문 안내로 보여 줍니다. 계정 서버가 연결되지 않은 테스트 환경에서는 `src/archive-fixture.js`의 공고 3건을 씁니다. 실시간 모델 호출은 아직 연결하지 않았습니다.
 
 홈 대표 공고 사진 `public/featured/bootcamp.webp`, `mentoring.webp`는 2026-11-16 Codex 이미지 생성 도구로 만들었습니다. 실존 인물, 학교 로고, 글자를 넣지 않도록 지시했습니다. 화면에 "AI로 생성한 이미지"로 표시합니다.
 

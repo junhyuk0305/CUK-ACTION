@@ -1,7 +1,7 @@
 import GuideDetail,{Differences} from './GuideDetail.jsx';
 import {applicationSchedule,scheduleDiff,schedules,initialGuide} from './guide.js';
 import {readGuide} from './gateway.js';
-import {archiveAiInput, archiveSearchText, archiveNoticeId, mergeGuestSaved} from './archive.js';
+import {archiveAiInput, archiveSearchText, archiveNoticeId, loadArchive, mergeGuestSaved} from './archive.js';
 import {createCoreValidationTemplates} from './core-validation-fixtures.js';
 import React,{useState,useEffect,useRef} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -40,7 +40,7 @@ function App({user,isManager,testMode:demoMode,logout}){
  const [page,setPage]=useState(isManager?'manager':'home'),[selected,setSelected]=useState(null),[tab,setTab]=useState('conditions'),[query,setQuery]=useState(''),[category,setCategory]=useState('전체'),[modal,setModal]=useState(false),[toast,setToast]=useState(''),[archive,setArchive]=useState(null),[archiveError,setArchiveError]=useState(false),[archiveItem,setArchiveItem]=useState(null),[limit,setLimit]=useState(20),[menu,setMenu]=useState(false);
  useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),3500);return()=>clearTimeout(t);},[toast]);
  useEffect(()=>setListPage(1),[query,category,bundle,openOnly,sort,page,dataset,pageSize]);
- useEffect(()=>{if((page==='archive'||page==='saved'||page==='notifications')&&!archive){fetch('/archive.json?v=final-20261116', {cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(rows=>setArchive(rows.filter(r=>r.use==='본문 발췌'||r.use==='원문 안내'))).catch(()=>setArchiveError(true));}},[page,archive]);
+ useEffect(()=>{if((page==='archive'||page==='saved'||page==='notifications')&&!archive){loadArchive().then(rows=>setArchive(rows.filter(r=>r.use==='본문 발췌'||r.use==='원문 안내'))).catch(()=>setArchiveError(true));}},[page,archive]);
  const event=(s,id,type,stepId)=>{const n=notices.find(n=>n.id===id),parentId=n?.parentId||id;return {...s,events:[...s.events,{id:crypto.randomUUID(),notice:parentId,optionId:n?.optionId,stepId,type,demo:!!n?.unpublished||!published.some(n=>n.id===parentId),at:new Date().toISOString()}]};};
  function navigate(p,section){if(managerBusy)return;if(managerDirty&&!window.confirm('저장하지 않은 공고 변경을 버릴까요?'))return;if(section){setManagerSection(section);setManagerNavigationKey(k=>k+1);}archiveReturn.current=null;setPage(p);setSelected(null);setArchiveItem(null);setQuery('');setCategory('전체');setBundle('all');setMenu(false);if(p==='home'||p==='explore')refreshNotices();window.scrollTo(0,0);}
  function resetFilters(){setQuery('');setCategory('전체');setBundle('all');setOpenOnly(false);setSort('recommended');}

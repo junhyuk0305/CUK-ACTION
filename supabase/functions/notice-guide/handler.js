@@ -1,7 +1,7 @@
 import {reviewRows,approvedRows,privateRows,labels} from '../../../src/guide.js';
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info'};
 const reply=(body,status=200)=>Response.json(body,{headers,status});
-export async function handleGuide(req,{db,env,fetchModel=fetch,excerpts}){
+export async function handleGuide(req,{db,env,fetchModel=fetch,excerpt}){
  if(req.method==='OPTIONS')return new Response(null,{headers});
  try{
 
@@ -10,8 +10,8 @@ export async function handleGuide(req,{db,env,fetchModel=fetch,excerpts}){
  const {data:grant}=await db.from('manager_grants').select('user_id').eq('user_id',user.id).maybeSingle();
  if(!grant)return reply({error:'담당자 권한이 필요합니다.'},403);
  const {id,action,rows}=await req.json();
- if(typeof id!=='string'||!Object.hasOwn(excerpts,id))return reply({error:'검수 발췌가 없습니다.'},400);
- const text=excerpts[id];
+ const text=typeof id==='string'?await excerpt(id):null;
+ if(!text)return reply({error:'검수 발췌가 없습니다.'},400);
  // Reserve the official ID before spending a model call. The DB rechecks ownership on every write.
  const save=async(mode,payload)=>{const {error}=await db.rpc('write_notice_guide',{p_user:user.id,p_id:id,p_mode:mode,p_rows:payload});if(error)throw Error('담당 공고를 저장할 수 없습니다.');};
  if(action==='extract'){

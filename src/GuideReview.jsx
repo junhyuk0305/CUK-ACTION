@@ -1,11 +1,11 @@
 import React,{useState,useEffect,useRef} from 'react';
 import {guideAction,readGuideDraft} from './gateway.js';
 import {labels,supported,approvedRows} from './guide.js';
-import {archiveAiInput} from './archive.js';
+import {archiveAiInput,loadArchive} from './archive.js';
 export default function GuideReview({testMode}){
  const [list,setList]=useState([]),[id,setId]=useState('277842'),[rows,setRows]=useState([]),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[dirty,setDirty]=useState(false);
  const lock=useRef(false),text=archiveAiInput(id);
- useEffect(()=>{let active=true;fetch('/archive.json').then(r=>r.json()).then(r=>{if(active)setList(r.filter(n=>archiveAiInput(n.id)));}).catch(()=>{if(active)setMsg('공고 목록을 읽지 못했습니다. 새로고침하세요.');});return()=>{active=false;};},[]);
+ useEffect(()=>{let active=true;loadArchive().then(r=>{if(active)setList(r.filter(n=>archiveAiInput(n.id)));}).catch(()=>{if(active)setMsg('공고 목록을 읽지 못했습니다. 새로고침하세요.');});return()=>{active=false;};},[]);
  useEffect(()=>{let active=true;setBusy(true);setRows([]);setDirty(false);setMsg('');readGuideDraft(id).then(r=>{if(active)setRows(r);}).catch(e=>{if(active)setMsg(e.message);}).finally(()=>{if(active)setBusy(false);});return()=>{active=false;};},[id]);
  async function run(action){
  if(lock.current)return;lock.current=true;setBusy(true);setMsg('');

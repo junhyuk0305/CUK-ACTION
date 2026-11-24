@@ -1,12 +1,10 @@
-import {archiveAiInput} from './archive.js';
-
 export const reviewedNoticeTemplates = [{
   templateId: 'official-277842',
   title: "[취업지원팀] 2026학년도 동계 직무 부트캠프 안내(현직자 멘토와 직무 경험)",
   category: '진로',
   department: '취업지원팀',
   sourceUrl: 'https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=277842',
-  summary: archiveAiInput('277842'),
+  summary: '취업지원팀이 재학생을 대상으로 동계 직무 부트캠프 참가자를 모집합니다. 모집 마감은 2026.12.14입니다.',
   label: '실제 공고 초안',
   color: 'green',
   status: 'draft',

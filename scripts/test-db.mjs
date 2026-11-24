@@ -15,6 +15,7 @@ await db.exec(await readFile(new URL('supabase/migrations/202611240002_manager_o
 await db.exec(await readFile(new URL('supabase/migrations/202611240003_option_activity.sql',root),'utf8'));
 await db.exec(await readFile(new URL('supabase/migrations/202611240004_followup_activity.sql',root),'utf8'));
 await db.exec(await readFile(new URL('supabase/migrations/202611240005_open_notices.sql',root),'utf8'));
+await db.exec(await readFile(new URL('supabase/migrations/202611250001_public_notices.sql',root),'utf8'));
 const ids = Object.fromEntries(['studentA','studentB','managerA','managerB','studentC','studentD','studentE','studentF'].map((name,i)=>[name,`00000000-0000-4000-8000-${String(i+1).padStart(12,'0')}`]));
 for (const [name,id] of Object.entries(ids)) await db.query('insert into auth.users(id,email) values ($1,$2)', [id,loginEmail(name)]);
 const protectedStudent='00000000-0000-4000-8000-000000000099';
@@ -442,5 +443,13 @@ try {
     assert.equal(second.length,1); assert.notEqual(second[0].v,first[0].v);
     await assert.rejects(()=>db.query('insert into public.student_state(data) values ($1)',[state('late first save')]),e=>e.code==='23505');
   }));
+  await check('visitors read only published notice id and data',async()=>{
+    const insert=async(title,status)=>(await db.query('insert into public.notices(owner_id,data,status) values ($1,$2,$3) returning id',[ids.managerB,{...notice,title},status])).rows[0].id;
+    const draft=await insert('anon draft','draft'), published=await insert('anon published','published');
+    const rows=(await asUser(null,()=>db.query('select id,data from public.notices'),'anon')).rows;
+    assert.ok(rows.some(r=>r.id===published)); assert.ok(!rows.some(r=>r.id===draft));
+    await asUser(null,()=>denied(()=>db.query('select owner_id from public.notices')),'anon');
+    await asUser(null,()=>denied(()=>db.query("update public.notices set status='draft' where id=$1",[published])),'anon');
+  });
   console.log(`\n${passed} database checks passed against PostgreSQL RLS in PGlite. Supabase Auth delivery/network are not exercised.`);
 } finally { await db.close(); }
