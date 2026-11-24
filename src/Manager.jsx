@@ -121,10 +121,10 @@ export default function Manager({user, onBack, templates = [], testMode = false,
   }
   const filtered = notices.filter(notice => (statusFilter === 'all' || notice.status === statusFilter) && (categoryFilter === 'all' || notice.category === categoryFilter) && `${notice.title} ${notice.department}`.toLowerCase().includes(search.trim().toLowerCase())).sort((a, b) => sort === 'title' ? (a.title || '').localeCompare(b.title || '', 'ko') : sort === 'updated' ? (b.updated_at || '').localeCompare(a.updated_at || '') : (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   const editorSections = editing ? [
-    ['manager-basics', '기본 정보', !!(editing.title?.trim() && editing.department?.trim() && editing.summary?.trim() && editing.sourceUrl && editing.applicationUrl && editing.deadline && editing.deadlineEvidence?.trim())],
-    ['manager-rules', '지원 조건', editing.rules.length > 0 && editing.rules.every(rule => rule.label?.trim() && rule.evidence?.trim() && (Array.isArray(rule.value) ? rule.value.length > 0 : String(rule.value).trim()))],
-    ['manager-documents', '제출 항목', taskText.trim().length > 0 && editing.questions.every(question => question.label?.trim() && Number(question.max) > 0)],
-    ['manager-review', '후속 절차·검수', !!(editing.followup?.trim() && editing.reviewed)],
+    ['manager-basics', '기본 정보', !!(editing.title?.trim() && editing.department?.trim() && editing.summary?.trim() && editing.sourceUrl && (!editing.deadline || editing.deadlineEvidence?.trim()))],
+    ['manager-rules', '지원 조건', editing.rules.every(rule => rule.label?.trim() && rule.evidence?.trim() && (Array.isArray(rule.value) ? rule.value.length > 0 : String(rule.value).trim()))],
+    ['manager-documents', '제출 항목', editing.questions.every(question => question.label?.trim() && Number(question.max) > 0)],
+    ['manager-review', '후속 절차·검수', !!editing.reviewed],
   ] : [];
   const completedSections = editorSections.filter(section => section[2]).length;
   const returnLabel = editorOrigin.current.view === 'overview' ? '통합 현황으로 돌아가기' : editorOrigin.current.view === 'metrics' ? '공고 집계로 돌아가기' : '담당 공고 목록';
@@ -153,10 +153,10 @@ export default function Manager({user, onBack, templates = [], testMode = false,
               <label>담당 부서<input value={editing.department} maxLength={100} onChange={event => change('department', event.target.value)} required/></label>
               <label className="manager-wide">공고 요약<textarea value={editing.summary} maxLength={2000} onChange={event => change('summary', event.target.value)} required/></label>
               <label className="manager-wide">공식 원문 주소<input type="url" placeholder="https://www.catholic.ac.kr/..." value={editing.sourceUrl} onChange={event => change('sourceUrl', event.target.value)} required/></label>
-              <label className="manager-wide">신청 경로 주소<input type="url" placeholder="https://... 또는 mailto:담당자 이메일" value={editing.applicationUrl} onChange={event => change('applicationUrl', event.target.value)} required/><small>HTTPS 주소나 mailto:로 시작하는 접수 이메일을 입력하세요.</small></label>
+              <label className="manager-wide">신청 경로 주소<input type="url" placeholder="https://... 또는 mailto:담당자 이메일" value={editing.applicationUrl} onChange={event => change('applicationUrl', event.target.value)}/><small>HTTPS 주소나 mailto:로 시작하는 접수 이메일을 입력하세요.</small></label>
               <label className="manager-wide">신청 방법 안내<textarea value={editing.applicationInstructions || ''} onChange={event => change('applicationInstructions', event.target.value)} placeholder="이메일 제목, 제출 방식, 마감 시간 등을 안내하세요."/></label>
-              <label>신청 마감일<input type="date" value={editing.deadline} onChange={event => change('deadline', event.target.value)} required/></label>
-              <label className="manager-wide">마감 근거<textarea value={editing.deadlineEvidence} placeholder="원문의 마감 날짜와 시간을 옮겨 적으세요." onChange={event => change('deadlineEvidence', event.target.value)} required/></label>
+              <label>신청 마감일<input type="date" value={editing.deadline} onChange={event => change('deadline', event.target.value)}/></label>
+              <label className="manager-wide">마감 근거<textarea value={editing.deadlineEvidence} placeholder="원문의 마감 날짜와 시간을 옮겨 적으세요." onChange={event => change('deadlineEvidence', event.target.value)} required={!!editing.deadline}/></label>
             </div>
             {safeUrl(editing.sourceUrl) && <a className="text-button" href={safeUrl(editing.sourceUrl)} target="_blank" rel="noreferrer">원문과 대조하기<ExternalLink size={15}/></a>}
           </section>
@@ -164,7 +164,7 @@ export default function Manager({user, onBack, templates = [], testMode = false,
           <section id="manager-rules" className="panel manager-section">
             <div className="section-heading"><h3>지원 조건</h3><button type="button" className="text-button" onClick={() => change('rules', [...editing.rules, newRule()])}><Plus size={16}/>조건 추가</button></div>
             <p className="muted">조건마다 비교 기준과 원문 근거를 입력하세요.</p>
-            {!editing.rules.length && <p className="manager-empty">등록된 조건이 없습니다. 게시하려면 조건을 추가하세요.</p>}
+            {!editing.rules.length && <p className="manager-empty">등록된 조건이 없습니다. 조건 없이 게시하면 학생에게 '지원 조건 없음'으로 보입니다.</p>}
             {editing.rules.map((rule, index) => <div className="manager-repeat" key={index}>
               <div className="section-heading"><b>조건 {index + 1}</b><button type="button" className="icon-button" aria-label={`조건 ${index + 1} 삭제`} onClick={() => removeRow('rules', index)}><Trash2 size={16}/></button></div>
               <div className="manager-fields">
@@ -180,7 +180,7 @@ export default function Manager({user, onBack, templates = [], testMode = false,
 
           <section id="manager-documents" className="panel manager-section">
             <h3>제출 항목과 작성 문항</h3>
-            <div className="manager-fields"><label className="manager-wide">준비 체크리스트<textarea value={taskText} placeholder={'신청 양식 확인\n필수 서류 준비'} onChange={event => {setTaskText(event.target.value); change('tasks', event.target.value.split('\n').map(value => value.trim()).filter(Boolean));}} required/><small>제출 항목을 한 줄에 하나씩 입력하세요.</small></label></div>
+            <div className="manager-fields"><label className="manager-wide">준비 체크리스트<textarea value={taskText} placeholder={'신청 양식 확인\n필수 서류 준비'} onChange={event => {setTaskText(event.target.value); change('tasks', event.target.value.split('\n').map(value => value.trim()).filter(Boolean));}}/><small>제출 항목을 한 줄에 하나씩 입력하세요.</small></label></div>
             <div className="section-heading"><b>직접 작성 문항</b><button type="button" className="text-button" onClick={() => change('questions', [...editing.questions, {label: '', hint: '', max: 1000}])}><Plus size={16}/>문항 추가</button></div>
             {!editing.questions.length && <p className="manager-empty">별도 작성 문항이 없습니다.</p>}
             {editing.questions.map((question, index) => <div className="manager-repeat" key={index}>
@@ -197,7 +197,7 @@ export default function Manager({user, onBack, templates = [], testMode = false,
           <WorkflowFields editing={editing} change={change} testMode={testMode}/>
           <section id="manager-review" className="panel manager-section">
             <h3>후속 절차와 검수</h3>
-            <div className="manager-fields"><label className="manager-wide">신청 후 확인할 일<textarea value={editing.followup} placeholder="발표 일정, 추가 서류, 오리엔테이션 등을 안내하세요." onChange={event => change('followup', event.target.value)} required/></label></div>
+            <div className="manager-fields"><label className="manager-wide">신청 후 확인할 일<textarea value={editing.followup} placeholder="발표 일정, 추가 서류, 오리엔테이션 등을 안내하세요." onChange={event => change('followup', event.target.value)}/></label></div>
             <label className="manager-review"><input type="checkbox" checked={!!editing.reviewed} onChange={event => change('reviewed', event.target.checked)}/><span>원문과 조건, 마감, 신청 경로를 대조했습니다.</span></label>
             <p className="muted">내용을 수정하면 검수 확인을 다시 받아야 합니다.</p>
             <div className="info-note">공식 접수 미연동. 카카오 발송과 학교 시스템도 미연동입니다.</div>

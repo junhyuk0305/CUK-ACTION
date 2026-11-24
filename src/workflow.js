@@ -19,10 +19,15 @@ export function deadlineState(notice, now = new Date()) {
   return days < 0 ? 'closed' : days === 0 ? 'unknown' : 'open';
 }
 
+export function noDeadlineLabel(notice) {
+  const parts = [notice.deadlineNote, notice.postedAt ? notice.postedAt + ' 게시' : ''].filter(Boolean);
+  return '마감일 없음 · ' + (parts.length ? parts.join(' · ') : '원문 확인 필요');
+}
+
 export function deadlineText(notice, now = new Date()) {
   if (notice.options?.length) return `신청 항목 ${notice.options.length}개 / 마감 개별 확인`;
   if (notice.deadlineStatus === 'conflict') return '마감 자료 불일치 / 확인 필요';
-  if (!notice.deadline) return '마감 확인 필요';
+  if (!notice.deadline) return noDeadlineLabel(notice);
   const suffix = notice.deadlineTime ? `${notice.deadlineTime} 한국 시간` : '시각 확인 필요';
   return `${notice.deadline} ${suffix}${deadlineState(notice, now) === 'closed' ? ' / 마감' : ''}`;
 }

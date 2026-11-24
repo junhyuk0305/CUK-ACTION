@@ -8,11 +8,11 @@ test('final archive exposes only approved IDs and exact reviewed excerpts', () =
   const index = JSON.parse(readFileSync(new URL('../public/archive.json', import.meta.url)));
   const raw = readFileSync(new URL('../public/ai-excerpts.json', import.meta.url));
   const inputs = JSON.parse(raw);
-  assert.equal(createHash('sha256').update(raw).digest('hex'), 'b4173501f02e6b516caa457564ec1849514fb333d18f3933e86e5f0f843567ae');
-  assert.equal(new Set(index.map(row => row.id)).size, 672);
-  assert.equal(index.length, 672);
+  assert.equal(createHash('sha256').update(raw).digest('hex'), '1a833b2588e6bc26eaa9272b833a87007dfa4cc76b52bb62d84bc77583dfaa78');
+  assert.equal(new Set(index.map(row => row.id)).size, 683);
+  assert.equal(index.length, 683);
   const reviewed = index.filter(row => row.use === '본문 발췌').map(row => row.id);
-  assert.equal(reviewed.length, 297);
+  assert.equal(reviewed.length, 306);
   assert.deepEqual(Object.keys(inputs).sort(), reviewed.sort());
   for (const row of index) {
     assert.deepEqual(Object.keys(row).sort(), ['category','date','department','id','title','url','use']);

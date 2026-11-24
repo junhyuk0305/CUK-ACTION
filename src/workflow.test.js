@@ -18,7 +18,10 @@ test('Korean deadline closes exactly at the specified minute; unknown and confli
   assert.equal(deadlineState({deadline: anchor}, new Date('2026-11-10T08:00:00Z')), 'unknown');
   assert.equal(deadlineState({deadline: anchor}, new Date('2026-11-10T15:00:00Z')), 'closed');
   assert.equal(deadlineState({deadline: anchor, deadlineStatus: 'conflict'}, new Date('2026-11-20')), 'unknown');
-  assert.equal(deadlineText({}), '마감 확인 필요');
+  assert.equal(deadlineText({}), '마감일 없음 · 원문 확인 필요');
+  assert.equal(deadlineText({deadlineNote: '선착순'}), '마감일 없음 · 선착순');
+  assert.equal(deadlineText({postedAt: '2026.02.27'}), '마감일 없음 · 2026.02.27 게시');
+  assert.equal(deadlineText({deadlineNote: '선착순', postedAt: '2026.04.15'}), '마감일 없음 · 선착순 · 2026.04.15 게시');
 });
 
 test('two application options retain separate keys, paths and deadlines under one notice', () => {

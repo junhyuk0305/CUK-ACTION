@@ -14,6 +14,7 @@ await db.exec(await readFile(new URL('supabase/migrations/202611240001_id_auth.s
 await db.exec(await readFile(new URL('supabase/migrations/202611240002_manager_overview.sql',root),'utf8'));
 await db.exec(await readFile(new URL('supabase/migrations/202611240003_option_activity.sql',root),'utf8'));
 await db.exec(await readFile(new URL('supabase/migrations/202611240004_followup_activity.sql',root),'utf8'));
+await db.exec(await readFile(new URL('supabase/migrations/202611240005_open_notices.sql',root),'utf8'));
 const ids = Object.fromEntries(['studentA','studentB','managerA','managerB','studentC','studentD','studentE','studentF'].map((name,i)=>[name,`00000000-0000-4000-8000-${String(i+1).padStart(12,'0')}`]));
 for (const [name,id] of Object.entries(ids)) await db.query('insert into auth.users(id,email) values ($1,$2)', [id,loginEmail(name)]);
 const protectedStudent='00000000-0000-4000-8000-000000000099';
@@ -123,9 +124,14 @@ try {
     await denied(()=>db.query('insert into public.notices(owner_id,data) values ($1,$2)',[ids.managerB,notice]));
   }));
   await check('server rejects unreviewed publication and missing evidence',()=>asUser(ids.managerA,async()=>{
-    for(const data of [{...notice,reviewed:false},{...notice,reviewed:'true'},{...notice,deadlineEvidence:''},{...notice,rules:[{...notice.rules[0],evidence:''}]},{...notice,applicationUrl:'javascript:alert(1)'},{...notice,deadline:'2026-02-31'},{...notice,rules:[]}]) {
+    for(const data of [{...notice,reviewed:false},{...notice,reviewed:'true'},{...notice,deadlineEvidence:''},{...notice,rules:[{...notice.rules[0],evidence:''}]},{...notice,applicationUrl:'javascript:alert(1)'},{...notice,deadline:'2026-02-31'},{...notice,deadline:'',deadlineNote:'선착순',deadlineEvidence:''},{...notice,summary:''}]) {
       await denied(()=>db.query("update public.notices set status='published', data=$1 where id=$2",[data,noticeA]));
     }
+  }));
+  await check('server publishes notices without deadline, conditions, tasks or application link',()=>asUser(ids.managerA,async()=>{
+    const open={...notice,deadline:'',deadlineEvidence:'',deadlineNote:'',applicationUrl:'',followup:'',rules:[],tasks:[],questions:[]};
+    const firstCome={...open,deadlineNote:'선착순',deadlineEvidence:'선착순 모집'};
+    for(const data of [open,firstCome]){const r=await db.query("insert into public.notices(data,status) values ($1,'published') returning id",[data]);assert.ok(r.rows[0].id);}
   }));
   await check('published schema rejects nontext fields and malformed nested values',()=>asUser(ids.managerA,async()=>{
     const malformed = [

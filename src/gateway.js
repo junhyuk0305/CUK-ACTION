@@ -30,11 +30,11 @@ export async function saveNotice(value){
  const u=manager(),db=readDB();if(value.id)ownNotice(db,value.id);
  if(value.status==='published'){
   validateWorkflow(value);
-  const textFields=['title','department','summary','followup','deadlineEvidence'];
+  const textFields=['title','department','summary'];
   const sourceOk=/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(value.sourceUrl||'');
-  const applicationOk=/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(value.applicationUrl||'')||/^mailto:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value.applicationUrl||'');
-  const date=new Date(value.deadline+'T00:00:00Z');
-  if(value.reviewed!==true||textFields.some(k=>typeof value[k]!=='string'||!value[k].trim())||!sourceOk||!applicationOk||!Number.isFinite(date.getTime())||date.toISOString().slice(0,10)!==value.deadline||!value.tasks?.length||!value.rules?.length||value.rules.some(r=>!r.label?.trim()||!r.evidence?.trim()))throw Error('게시하려면 기본 정보, 신청 경로, 조건과 마감 근거를 검수하세요.');
+  const applicationOk=!value.applicationUrl||/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(value.applicationUrl)||/^mailto:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value.applicationUrl);
+  const evidenceOk=!(value.deadline||value.deadlineNote)||!!value.deadlineEvidence?.trim();
+  if(value.reviewed!==true||textFields.some(k=>typeof value[k]!=='string'||!value[k].trim())||!sourceOk||!applicationOk||!evidenceOk||(value.rules||[]).some(r=>!r.label?.trim()||!r.evidence?.trim()))throw Error('게시하려면 기본 정보, 신청 경로, 조건과 마감 근거를 검수하세요.');
   if(value.questions?.some(q=>!q.label?.trim()||!Number.isInteger(q.max)||q.max<1||q.max>10000))throw Error('문항명과 1~10000자 범위의 글자 수를 확인하세요.');
  }
  const next={...value,id:value.id||crypto.randomUUID(),owner_id:u.id,dataKind:'test',updated_at:new Date().toISOString()};
