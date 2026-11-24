@@ -22,3 +22,4 @@ docs/NOTICE-REVIEW.md
 docs/OFFLINE-WORKFLOW.md
 docs/USER-VALIDATION.md
 src/core-validation.source.test.js
+.netlify/
