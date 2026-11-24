@@ -11,3 +11,7 @@
 .changed-requirements input { flex: 0 0 auto; margin-top: 6px; }
 
 .discovery-controls .filter-reset{font-size:11px;white-space:nowrap}.saved-archive{margin-top:var(--sp-2)}.saved-archive h3{overflow-wrap:anywhere}
+.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2);margin-top:var(--sp-3)}
+.pager label{display:flex;align-items:center;gap:var(--sp-1);color:var(--muted)}
+.pager-nav{display:flex;align-items:center;gap:var(--sp-2)}
+.pager-nav span{min-width:56px;text-align:center}
