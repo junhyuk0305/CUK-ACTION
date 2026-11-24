@@ -4,6 +4,7 @@ dist-check/
 *.log
 .env*
 !.env.example
+!.env.validation
 *.png
 
 # Local work and generated files

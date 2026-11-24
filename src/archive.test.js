@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {archiveAiInput, archiveSearchText} from './archive.js';
+import {archiveAiInput, archiveSearchText, archiveNoticeId, mergeGuestSaved} from './archive.js';
 
 test('final archive exposes only approved IDs and exact reviewed excerpts', () => {
   const index = JSON.parse(readFileSync(new URL('../public/archive.json', import.meta.url)));
@@ -23,4 +23,14 @@ test('final archive exposes only approved IDs and exact reviewed excerpts', () =
   }
   assert.equal(archiveAiInput('unknown'), null);
   assert.equal(archiveAiInput('__proto__'), null);
+});
+
+test('guest saved archive IDs merge into account saved list', () => {
+  const published = [{id:'n-1', sourceUrl:'https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=277842'}, {id:'n-2', sourceUrl:'https://www.catholic.ac.kr/ko/campuslife/notice.do?articleNo=2778420&mode=view'}];
+  assert.deepEqual(mergeGuestSaved([], ['277848', '277849', '277850'], published), ['277848', '277849', '277850']);
+  assert.deepEqual(mergeGuestSaved(['277848', 'n-1'], ['277848', '277842', '277848'], published), ['277848', 'n-1']);
+  assert.equal(archiveNoticeId('277842', published), 'n-1');
+  assert.equal(archiveNoticeId('277843', published), '277843');
+  assert.deepEqual(mergeGuestSaved(['a'], null, published), ['a']);
+  assert.deepEqual(mergeGuestSaved([], [277842, '277842'], published), ['n-1']);
 });

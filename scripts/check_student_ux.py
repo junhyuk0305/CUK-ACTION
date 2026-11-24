@@ -33,7 +33,7 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('popup', lambda popup: popups.append(popup))
     page.on('request', lambda req: backend_requests.append(req.url) if 'supabase' in (urlparse(req.url).hostname or '') else None)
-    page.goto(BASE)
+    page.goto(BASE + '/account.html')
     page.wait_for_load_state('networkidle')
     page.get_by_role('button', name='학생 A로 체험', exact=True).click()
     expect(page.get_by_text('테스트 공간 / 학생 A', exact=False)).to_be_visible()

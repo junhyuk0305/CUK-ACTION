@@ -428,5 +428,19 @@ try {
     });
   });
   await check('invalid private state rejected with real DB failure',()=>asUser(ids.studentA,()=>denied(()=>db.query('update public.student_state set data=$1',[{...state('A'),events:[]}]))));
+  await check('stale device save: version-checked update hits 0 rows and keeps the first device save',()=>asUser(ids.studentA,async()=>{
+    // Versions travel as text, as PostgREST sends them; a JS Date would drop microseconds.
+    const read=async()=>(await db.query('select data,updated_at::text as v from public.student_state')).rows[0];
+    const save=async(name,v)=>(await db.query('update public.student_state set data=$1 where user_id=$2 and updated_at=$3 returning updated_at::text as v',[state(name),ids.studentA,v])).rows;
+    const phone=await read(),pc=await read();
+    assert.equal(phone.v,pc.v);
+    const first=await save('phone',phone.v);
+    assert.equal(first.length,1); assert.notEqual(first[0].v,phone.v);
+    assert.equal((await save('stale pc',pc.v)).length,0);
+    assert.deepEqual((await read()).data,state('phone'));
+    const second=await save('phone again',first[0].v);
+    assert.equal(second.length,1); assert.notEqual(second[0].v,first[0].v);
+    await assert.rejects(()=>db.query('insert into public.student_state(data) values ($1)',[state('late first save')]),e=>e.code==='23505');
+  }));
   console.log(`\n${passed} database checks passed against PostgreSQL RLS in PGlite. Supabase Auth delivery/network are not exercised.`);
 } finally { await db.close(); }

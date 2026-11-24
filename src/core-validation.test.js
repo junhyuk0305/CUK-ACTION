@@ -43,14 +43,15 @@ test('all source types: offline preparation, failed save, restoration, aggregati
       for (let i = 0; i < 5; i++) {
         const id = 'core-student-' + i;
         setTestUser({id, role: 'student'});
-        const before = await loadStudentState(id) || {applications: {}, saved: []};
+        const row = await loadStudentState(id), before = row?.data || {applications: {}, saved: []};
         const state = {...before, saved: [...before.saved, posted.id], applications: {...before.applications,
           [posted.id]: {answers: {0: '학생이 직접 쓴 가상 답변'}, checks: {0: true}, noticeSnapshot: posted, completed: true}}};
-        await saveStudentState(id, state);
+        const version = await saveStudentState(id, state, row?.version ?? null);
+        await assert.rejects(saveStudentState(id, {...state, saved: []}, row?.version ?? null), e => e.code === 'conflict');
         fail = true;
-        await assert.rejects(saveStudentState(id, {...state, saved: []}), /저장하지 못했습니다/);
+        await assert.rejects(saveStudentState(id, {...state, saved: []}, version), /저장하지 못했습니다/);
         fail = false;
-        assert.deepEqual(await loadStudentState(id), state);
+        assert.deepEqual((await loadStudentState(id)).data, state);
         for (const type of ['view', 'view', 'interest', 'start', 'link', 'complete']) await recordActivity(posted.id, type);
       }
       setTestUser(manager);
@@ -60,7 +61,7 @@ test('all source types: offline preparation, failed save, restoration, aggregati
       await saveNotice({...posted, status: 'archived'});
       setTestUser({id: 'core-student-0', role: 'student'});
       assert.ok(!(await listPublishedNotices()).some(row => row.id === posted.id));
-      assert.equal((await loadStudentState('core-student-0')).applications[posted.id].answers[0], '학생이 직접 쓴 가상 답변');
+      assert.equal((await loadStudentState('core-student-0')).data.applications[posted.id].answers[0], '학생이 직접 쓴 가상 답변');
       await assert.rejects(recordActivity(posted.id, 'start'), /게시된 공고가 아닙니다/);
     }
   } finally {setTestUser(null); delete globalThis.localStorage;}

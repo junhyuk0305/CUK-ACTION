@@ -1,7 +1,7 @@
 import GuideDetail,{Differences} from './GuideDetail.jsx';
 import {applicationSchedule,scheduleDiff,schedules,initialGuide} from './guide.js';
 import {readGuide} from './gateway.js';
-import {archiveAiInput, archiveSearchText} from './archive.js';
+import {archiveAiInput, archiveSearchText, archiveNoticeId, mergeGuestSaved} from './archive.js';
 import {createCoreValidationTemplates} from './core-validation-fixtures.js';
 import React,{useState,useEffect,useRef} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -28,15 +28,15 @@ function App({user,isManager,testMode:demoMode,logout}){
  const [published,setPublished]=useState([]),[noticeError,setNoticeError]=useState(''),[dataset,setDataset]=useState('managed'),[managerDirty,setManagerDirty]=useState(false),[managerBusy,setManagerBusy]=useState(false),[managerSection,setManagerSection]=useState('overview'),[managerNavigationKey,setManagerNavigationKey]=useState(0),[bundle,setBundle]=useState('all'),[sort,setSort]=useState('recommended'),[pageSize,setPageSize]=useState(20),[listPage,setListPage]=useState(1),[openOnly,setOpenOnly]=useState(true),[applicationFilter,setApplicationFilter]=useState('all');
  const [,refreshClock]=useState(0);
  useEffect(()=>{const timer=setInterval(()=>refreshClock(value=>value+1),30000);return()=>clearInterval(timer);},[]);
- const listScroll=useRef(0),archiveReturn=useRef(null);
- async function refreshNotices(){try{setPublished(await listPublishedNotices());setNoticeError('');}catch(e){setNoticeError(e.message);}}
+ const listScroll=useRef(0),archiveReturn=useRef(null),guestIntake=useRef(false),guestMarker=useRef(null),[noticesReady,setNoticesReady]=useState(false);
+ async function refreshNotices(){try{setPublished(await listPublishedNotices());setNoticeError('');setNoticesReady(true);}catch(e){setNoticeError(e.message);}}
  useEffect(()=>{refreshNotices();window.addEventListener('focus',refreshNotices);window.addEventListener('storage',refreshNotices);return()=>{window.removeEventListener('focus',refreshNotices);window.removeEventListener('storage',refreshNotices);};},[user.id]);
  const demos=DEMO?demoNotices.map(n=>({...n,isDemo:true})):[];
  const allCurrent=[...published,...published.flatMap(applicationOptions),...demos];
  const notices=[...allCurrent.map(n=>withSavedApplication(n,state.applications[n.id])),...Object.entries(state.applications).filter(([id,a])=>a.noticeSnapshot&&!allCurrent.some(n=>n.id===id)).map(([,a])=>({...a.noticeSnapshot,unpublished:true}))];
  const noticeKind=n=>n.isDemo?'가상 시연 공고':testMode?'테스트 게시 공고':'검수된 실제 공고';
- const saveLabel=saveStatus==='pending'?'저장 대기':saveStatus==='saving'?'저장 중':saveStatus==='error'?'저장 실패':testMode?'테스트 저장됨':'서버 저장됨';
- async function leave(){if(managerBusy)return;if(managerDirty&&!window.confirm('저장하지 않은 공고 변경을 버리고 나갈까요?'))return;if(await flush())await logout();}
+ const saveLabel=saveStatus==='pending'?'저장 대기':saveStatus==='saving'?'저장 중':saveStatus==='error'?'저장 실패':saveStatus==='conflict'?'다른 기기에서 수정됨':testMode?'테스트 저장됨':'서버 저장됨';
+ async function leave(){if(managerBusy)return;if(managerDirty&&!window.confirm('저장하지 않은 공고 변경을 버리고 나갈까요?'))return;if(saveStatus==='conflict'){if(window.confirm('다른 기기에서 수정해 이 화면의 내용을 저장하지 못했습니다. 저장하지 않고 로그아웃할까요?'))await logout();return;}if(await flush())await logout();}
  const [page,setPage]=useState(isManager?'manager':'home'),[selected,setSelected]=useState(null),[tab,setTab]=useState('conditions'),[query,setQuery]=useState(''),[category,setCategory]=useState('전체'),[modal,setModal]=useState(false),[toast,setToast]=useState(''),[archive,setArchive]=useState(null),[archiveError,setArchiveError]=useState(false),[archiveItem,setArchiveItem]=useState(null),[limit,setLimit]=useState(20),[menu,setMenu]=useState(false);
  useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),3500);return()=>clearTimeout(t);},[toast]);
  useEffect(()=>setListPage(1),[query,category,bundle,openOnly,sort,page,dataset,pageSize]);
@@ -90,6 +90,18 @@ function App({user,isManager,testMode:demoMode,logout}){
  function Empty({text,action='공고 둘러보기',onClick=()=>navigate('explore')}){return <div className="empty"><Compass size={32}/><h3>{text}</h3><button className="button secondary" onClick={onClick}>{action}<ArrowRight size={16}/></button></div>}
  const notice=selected?(notices.find(n=>n.id===selected.id)||selected):null;
  useEffect(()=>{if(loaded&&notice&&!state.seenSchedules?.[notice.id]&&(state.applications[notice.id]||state.saved.includes(notice.id)))rememberSchedule(notice.id,applicationSchedule(notice.currentNotice||notice));},[loaded,notice?.id,state.seenSchedules]);
+ // A public "준비 시작" link (#start/{id}) and the guest saved list join the account once, after its state and published notices load.
+ useEffect(()=>{if(!loaded||!noticesReady||testMode||guestIntake.current)return;guestIntake.current=true;
+  const startId=location.hash.match(/^#start\/(\d+)$/)?.[1],key='cuk-action-guest-imported:'+user.id;let guest=[];
+  try{if(!localStorage.getItem(key)){guest=JSON.parse(localStorage.getItem('cuk-action-campus-saved')||'[]');if(Array.isArray(guest)&&mergeGuestSaved(state.saved,guest,published).length>state.saved.length)guestMarker.current={key,saving:false};else localStorage.setItem(key,'1');}}catch{}
+  if(startId)history.replaceState(history.state,'',location.pathname+location.search);
+  const ids=[...(Array.isArray(guest)?guest:[]),...(startId?[startId]:[])];
+  if(ids.length)setState(s=>{const saved=mergeGuestSaved(s.saved,ids,published),added=published.filter(n=>saved.includes(n.id)&&!s.saved.includes(n.id));return added.reduce((acc,n)=>event(acc,n.id,'interest'),{...s,saved,seenSchedules:{...Object.fromEntries(added.map(n=>[n.id,applicationSchedule(n)])),...s.seenSchedules}});});
+  const target=startId&&published.find(n=>n.id===archiveNoticeId(startId,published));
+  if(target)open(target);else if(startId)navigate('saved');
+ },[loaded,noticesReady]);
+ // Mark the guest list as imported only after the server has stored it, so a failed or conflicting save imports it again next time.
+ useEffect(()=>{const m=guestMarker.current;if(!m)return;if(saveStatus==='saving')m.saving=true;else if(saveStatus==='saved'&&m.saving){try{localStorage.setItem(m.key,'1');}catch{}guestMarker.current=null;}},[saveStatus]);
  const hasApplication=!!(notice&&state.applications[notice.id]);
  const currentForm=notice?.formChanged?requirementsKey(notice.currentNotice):null;
  const changeReviewed=!currentForm||state.applications[notice.id]?.reviewedRequirements===currentForm;
@@ -102,7 +114,7 @@ function App({user,isManager,testMode:demoMode,logout}){
   <aside className={'sidebar '+(menu?'open':'')}><a className="brand" href="#" onClick={e=>{e.preventDefault();navigate(isManager&&page==='manager'?'manager':'home','overview');}}><span className="brand-symbol"><GraduationCap size={23}/></span><span>CUK <b>ACTION</b><small>가톨릭대학교 캠퍼스 라이프</small></span></a><div className="workspace-label">{page==='manager'?'PROGRAM WORKSPACE':'MY CAMPUS'}</div>{page==='manager'?<nav aria-label="담당자 메뉴"><button className={managerSection==='overview'?'active':''} onClick={()=>navigate('manager','overview')}><BarChart3 size={20}/>통합 현황</button><button className={managerSection==='list'?'active':''} onClick={()=>navigate('manager','list')}><FileText size={20}/>공고 관리</button><button onClick={()=>navigate('home')}><Compass size={20}/>학생 화면 보기</button></nav>:<nav aria-label="학생 메뉴">{nav.map(([id,Icon,label])=><button key={id} className={page===id&&!selected?'active':''} onClick={()=>navigate(id)}><Icon size={20}/>{label}{id==='applications'&&active.length>0&&<span className="nav-count">{active.length}</span>}{id==='notifications'&&alarms.some(n=>!state.read.includes(alarmKey(n)))&&<i className="dot"/>}</button>)}</nav>}<div className="sidebar-bottom"><div className="side-note"><span className="mini-brand">A</span><strong>발견한 기회를,<br/>나의 다음 경험으로.</strong><p>조건 확인부터 제출 준비까지</p></div><button className={'nav-bottom '+(page==='archive'?'active':'')} onClick={()=>navigate('archive')}><FileText size={18}/>실제 공고 보관함<ArrowUpRight size={15}/></button>{isManager&&page!=='manager'&&<button className='nav-bottom' onClick={()=>navigate('manager','overview')}><BarChart3 size={18}/>담당자 홈</button>}<button className='nav-bottom' onClick={leave} disabled={managerBusy}>로그아웃</button><button className="profile-mini" onClick={()=>page==='manager'?navigate('home'):setModal(true)}><span className="avatar">{state.profile.name?state.profile.name[0]:<User size={20}/>}</span><span><b>{page==='manager'?user.email:state.profile.name||'내 프로필 설정'}</b><small>{page==='manager'?'공고 운영 공간':state.profile.department||'맞춤 조건을 확인하세요'}</small></span><Settings size={17}/></button></div></aside>
   {menu&&<button className='menu-backdrop' aria-label='메뉴 닫기' onClick={()=>setMenu(false)}/>}<div className="main-shell"><header className="topbar"><div className="row"><button className="icon-button mobile-menu" aria-label="메뉴" aria-expanded={menu} onClick={()=>setMenu(!menu)}><Menu size={22}/></button><span className="breadcrumb">{page==='manager'?'담당자 공간':'나의 캠퍼스'} <ChevronRight size={14}/><b>{selected?'공고 상세':page==='archive'?'실제 공고 보관함':page==='manager'?'담당 공고 관리':nav.find(n=>n[0]===page)?.[2]}</b></span></div><div className="row"><span className="prototype"><i/>{testMode?'UI 테스트':'내 계정'}</span>{page!=='manager'&&<><button className="icon-button" aria-label="알림 열기" onClick={()=>navigate('notifications')}><Bell size={20}/></button><button className="avatar small" aria-label="프로필 수정" onClick={()=>setModal(true)}>{state.profile.name?.[0]||<User size={17}/>}</button></>}</div></header>
   <main><div className="session-strip">{testMode?<div className="info-note"><span><b>테스트 공간 / {user.email}</b><span className='session-detail'>브라우저 저장 / 서버 미연동</span></span></div>:<span className="tag">내 계정 {user.email}</span>}<button className="button secondary" onClick={leave} disabled={managerBusy}>{testMode?'테스트 종료':'로그아웃'}</button></div>
-  {saveError&&<div role="alert" className="warning">{saveError} 작성 내용은 화면에 남아 있습니다.<button className="text-button" onClick={retry}>저장 다시 시도</button></div>}
+  {saveError&&<div role="alert" className="warning">{saveError} 작성 내용은 화면에 남아 있습니다.<button className="text-button" onClick={retry}>{saveStatus==='conflict'?'서버 내용 새로 불러오기':'저장 다시 시도'}</button></div>}
   {activityError&&<div role="alert" className="warning">작성 내용은 저장됐지만 활동 집계 기록을 저장하지 못했습니다.<button className="text-button" onClick={flush}>기록 다시 시도</button></div>}
   {noticeError&&<div role="alert" className="warning">{noticeError}<button className="text-button" onClick={refreshNotices}>공고 다시 불러오기</button></div>}
   {page!=='manager'&&<p className={'data-status '+(saveError?'error':'')} role="status">{saveLabel}</p>}

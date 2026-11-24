@@ -14,7 +14,6 @@ def no_overflow(page, name):
 
 
 def enter(page, account):
-    page.get_by_role('button', name='공고 담당자' if '담당자' in account else '학생', exact=True).click()
     if page.get_by_role('button', name='테스트 공간 열기', exact=True).count():
         page.get_by_role('button', name='테스트 공간 열기', exact=True).click()
     page.get_by_role('button', name=account + '로 체험', exact=True).click()
@@ -23,7 +22,7 @@ def enter(page, account):
 
 def exit_test(page):
     page.get_by_role('button', name='테스트 종료', exact=True).click()
-    expect(page.get_by_role('button', name='공고 담당자', exact=True)).to_be_visible()
+    expect(page.get_by_role('button', name='담당자 A로 체험', exact=True)).to_be_visible()
 
 
 with sync_playwright() as p:
@@ -33,9 +32,9 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     dialog_decision = {'accept': True}
     page.on('dialog', lambda dialog: dialog.accept() if dialog_decision['accept'] else dialog.dismiss())
-    page.goto(BASE)
+    page.goto(BASE + '/account.html')
     page.wait_for_load_state('networkidle')
-    expect(page.get_by_role('button', name='공고 담당자', exact=True)).to_be_visible()
+    expect(page.get_by_role('button', name='담당자 A로 체험', exact=True)).to_be_visible()
     enter(page, '담당자 A')
     expect(page.locator('.overview')).to_be_visible()
     expect(page.locator('.overview-kpis')).to_be_visible()
@@ -193,7 +192,7 @@ with sync_playwright() as p:
         'export async function saveNotice(value){',
         'export async function saveNotice(value){ await new Promise(resolve=>{window.finishManagerSave=resolve;});')
     delayed.route('**/src/gateway.js*', lambda route: route.fulfill(status=200, content_type='application/javascript', body=source))
-    delayed.goto(BASE)
+    delayed.goto(BASE + '/account.html')
     delayed.wait_for_load_state('networkidle')
     enter(delayed, '담당자 A')
     delayed.locator('.manager-workspace-tabs').get_by_role('button', name='공고 관리', exact=True).click()

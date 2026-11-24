@@ -14,8 +14,7 @@ def no_overflow(page, label):
 
 
 def enter(page):
-    page.goto(BASE, wait_until='domcontentloaded')
-    page.get_by_role('button', name='공고 담당자', exact=True).click()
+    page.goto(BASE + '/account.html', wait_until='domcontentloaded')
     page.get_by_role('button', name='담당자 A로 체험', exact=True).click()
     expect(page.locator('.overview-kpis')).to_be_visible()
 

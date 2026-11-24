@@ -78,7 +78,8 @@ Vite 정적 화면이 Supabase Auth와 Data API에 연결하므로 기존 Sites 
 npm test
 npm run test:db
 npm run build
-# 개발 서버를 실행한 상태에서 Python Playwright와 Edge 사용
+# 운영 키 없이 개발 서버를 띄운 상태에서 Python Playwright와 Edge 사용
+npm run dev:validation
 npm run test:browser
 # 검사용 빌드를 띄운 상태에서 공개 안내와 일정 확인 흐름 검사
 npm run build:check

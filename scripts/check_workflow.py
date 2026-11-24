@@ -14,14 +14,13 @@ CONFLICT = '[흐름 테스트] 일정 확인 필요 사례'
 
 
 def enter(page, name):
-    page.get_by_role('button', name='공고 담당자' if '담당자' in name else '학생', exact=True).click()
     page.get_by_role('button', name=name + '로 체험', exact=True).click()
     expect(page.get_by_role('button', name='테스트 종료', exact=True)).to_be_visible()
 
 
 def leave(page):
     page.get_by_role('button', name='테스트 종료', exact=True).click()
-    expect(page.get_by_role('button', name='학생', exact=True)).to_be_visible()
+    expect(page.get_by_role('button', name='학생 A로 체험', exact=True)).to_be_visible()
 
 
 def saved(page):
@@ -60,7 +59,7 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('popup', lambda popup: popups.append(popup.url))
     page.on('dialog', lambda dialog: dialog.accept())
-    page.goto(BASE)
+    page.goto(BASE + '/account.html')
     page.wait_for_load_state('networkidle')
     expect(page.get_by_role('button', name='학생 A로 체험', exact=True)).to_be_visible()
     enter(page, '담당자 A')

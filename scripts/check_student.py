@@ -4,7 +4,6 @@ import re
 from playwright.sync_api import sync_playwright, expect
 
 def enter(page, name='학생 A'):
-    page.get_by_role('button', name='학생', exact=True).click()
     if page.get_by_role('button', name='테스트 공간 열기', exact=True).count(): page.get_by_role('button', name='테스트 공간 열기', exact=True).click()
     page.get_by_role('button', name=name+'로 체험', exact=True).click()
     expect(page.get_by_text('테스트 공간 / '+name, exact=False)).to_be_visible()
@@ -17,8 +16,8 @@ with sync_playwright() as p:
     context=browser.new_context(viewport={'width':1440,'height':1000},accept_downloads=True)
     page=context.new_page(); errors=[]
     page.on('pageerror',lambda e: errors.append(str(e)))
-    page.goto('http://127.0.0.1:5173'); page.wait_for_load_state('networkidle')
-    expect(page.get_by_text('실제 계정 연결 준비 중입니다.',exact=False)).to_be_visible()
+    page.goto('http://127.0.0.1:5173/account.html'); page.wait_for_load_state('networkidle')
+    expect(page.get_by_text('계정 서버 설정이 필요합니다.',exact=False)).to_be_visible()
     page.screenshot(path='login-v2.png',full_page=True)
     enter(page)
     expect(page.get_by_role('button',name='담당 공고 관리',exact=True)).to_have_count(0)

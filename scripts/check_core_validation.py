@@ -13,13 +13,12 @@ DORM = '[검수 연습] K/A관 입사까지'
 
 
 def enter(page, name):
-    page.get_by_role('button', name='공고 담당자' if '담당자' in name else '학생', exact=True).click()
     page.get_by_role('button', name=name + '로 체험', exact=True).click()
 
 
 def leave(page):
     page.get_by_role('button', name='테스트 종료', exact=True).click()
-    expect(page.get_by_role('button', name='학생', exact=True)).to_be_visible()
+    expect(page.get_by_role('button', name='학생 A로 체험', exact=True)).to_be_visible()
 
 
 def saved(page):
@@ -41,7 +40,7 @@ with sync_playwright() as p:
     context.route('**/*', route)
     page = context.new_page()
     page.on('pageerror', lambda e: errors.append(str(e)))
-    page.goto(BASE)
+    page.goto(BASE + '/account.html')
     page.wait_for_load_state('networkidle')
     enter(page, '담당자 A')
     page.locator('.manager-workspace-tabs').get_by_role('button', name='공고 관리', exact=True).click()

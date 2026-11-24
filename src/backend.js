@@ -40,15 +40,26 @@ export async function resetPasswordWithId(id, password) {
 }
 function flatten(row) { return { ...row.data, id: row.id, status: row.status, owner_id: row.owner_id, updated_at: row.updated_at, isDemo: false }; }
 
+// Version = the row's updated_at exactly as the server sent it. A save only lands on that version.
+export function conflictError() { return Object.assign(new Error('다른 기기에서 먼저 수정했습니다. 새로 불러오면 이 화면의 저장 안 된 내용은 사라집니다.'), { code: 'conflict' }); }
 export async function loadStudentState(userId) {
-  const { data, error } = await client().from('student_state').select('data').eq('user_id', userId).maybeSingle();
+  const { data, error } = await client().from('student_state').select('data,updated_at').eq('user_id', userId).maybeSingle();
   failure(error, '내 정보 조회');
-  return data?.data || null;
+  return data ? { data: data.data, version: data.updated_at } : null;
 }
-export async function saveStudentState(userId, state) {
+export async function saveStudentState(userId, state, version = null) {
   const data = { profile: state.profile, saved: state.saved, applications: state.applications, read: state.read, seenSchedules:state.seenSchedules||{} };
-  const { error } = await client().from('student_state').upsert({ user_id: userId, data });
+  const table = client().from('student_state');
+  if (version === null) {
+    const { data: row, error } = await table.insert({ user_id: userId, data }).select('updated_at').single();
+    if (error?.code === '23505') throw conflictError();
+    failure(error, '저장');
+    return row.updated_at;
+  }
+  const { data: rows, error } = await table.update({ data }).eq('user_id', userId).eq('updated_at', version).select('updated_at');
   failure(error, '저장');
+  if (!rows.length) throw conflictError();
+  return rows[0].updated_at;
 }
 export async function isManager(userId) {
   const { data, error } = await client().from('manager_grants').select('user_id').eq('user_id', userId).maybeSingle();

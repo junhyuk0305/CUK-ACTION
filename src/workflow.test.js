@@ -97,7 +97,7 @@ test('offline publication → independent preparations → parent deduplication 
       let app = {completed: true, noticeSnapshot: postedDorm};
       for (const step of postedDorm.followupSteps) app.followupChecks = toggleFollowup(postedDorm, app, step.id, true);
       await saveStudentState(user.id, {applications: {[first.id]: {answers: {0: '1기 작성본'}, completed: true}, [second.id]: {answers: {0: '2기 작성본'}, completed: false}, [postedDorm.id]: app}});
-      const restored = await loadStudentState(user.id);
+      const restored = (await loadStudentState(user.id)).data;
       assert.equal(restored.applications[first.id].answers[0], '1기 작성본');
       assert.equal(restored.applications[second.id].completed, false);
       for (const n of [first, second]) for (const type of ['view', 'view', 'start', 'link']) await recordActivity(postedBio.id, type, n.optionId);

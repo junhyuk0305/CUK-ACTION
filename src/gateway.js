@@ -20,8 +20,8 @@ function writeDB(db){try{localStorage.setItem(KEY,JSON.stringify(db));}catch{thr
 function current(){if(!DEMO||!testUser)throw Error('로그인이 필요합니다.');return testUser;}
 function manager(){const u=current();if(u.role!=='manager')throw Error('담당자 권한이 없습니다.');return u;}
 function ownNotice(db,id){const u=manager();const n=db.notices.find(n=>n.id===id&&n.owner_id===u.id);if(!n)throw Error('관리할 수 없는 공고입니다.');return n;}
-export async function loadStudentState(id){if(!DEMO||!testUser)return live.loadStudentState(id);if(current().id!==id)throw Error('본인 데이터만 열 수 있습니다.');return readDB().students[id]||null;}
-export async function saveStudentState(id,data){if(!DEMO||!testUser)return live.saveStudentState(id,data);if(current().id!==id)throw Error('본인 데이터만 저장할 수 있습니다.');const db=readDB();db.students[id]=data;writeDB(db);}
+export async function loadStudentState(id){if(!DEMO||!testUser)return live.loadStudentState(id);if(current().id!==id)throw Error('본인 데이터만 열 수 있습니다.');const db=readDB(),data=db.students[id];return data?{data,version:String(db.studentVersions?.[id]||0)}:null;}
+export async function saveStudentState(id,data,version=null){if(!DEMO||!testUser)return live.saveStudentState(id,data,version);if(current().id!==id)throw Error('본인 데이터만 저장할 수 있습니다.');const db=readDB(),now=db.students[id]?String(db.studentVersions?.[id]||0):null;if(now!==version)throw live.conflictError();const next=String(Number(now)+1);db.students[id]=data;db.studentVersions={...db.studentVersions,[id]:next};writeDB(db);return next;}
 export async function isManager(id){if(!DEMO||!testUser)return live.isManager(id);return current().id===id&&testUser.role==='manager';}
 export async function listPublishedNotices(){return DEMO&&testUser?readDB().notices.filter(n=>n.status==='published'):live.listPublishedNotices();}
 export async function listManagedNotices(){if(!DEMO||!testUser)return live.listManagedNotices();return readDB().notices.filter(n=>n.owner_id===manager().id);}
