@@ -13,6 +13,12 @@ def no_overflow(page, name):
     assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), name
 
 
+def side(page, name):
+    # Manager pages have no in-page tabs; on narrow screens the sidebar opens from the menu button.
+    button = page.locator('.sidebar').get_by_role('button', name=name, exact=True)
+    if not button.is_visible(): page.get_by_role('button', name='메뉴', exact=True).click()
+    button.click()
+
 def enter(page, account):
     if page.get_by_role('button', name='테스트 공간 열기', exact=True).count():
         page.get_by_role('button', name='테스트 공간 열기', exact=True).click()
@@ -43,7 +49,7 @@ with sync_playwright() as p:
     no_overflow(page, 'manager overview mobile')
     page.screenshot(path=str(screenshots / 'manager-overview-mobile.png'), full_page=True)
     page.set_viewport_size({'width':1440,'height':1000})
-    page.locator('.manager-workspace-tabs').get_by_role('button', name='공고 관리', exact=True).click()
+    side(page, '공고 관리')
     count_a=page.locator('.manager-notice').count()
     assert count_a >= 1
     expect(page.locator('.manager-list')).to_contain_text('[테스트] 학생 프로젝트 모집')
@@ -57,8 +63,9 @@ with sync_playwright() as p:
     no_overflow(page, 'manager desktop list')
 
     page.get_by_role('button', name='공고 등록', exact=True).click()
-    save_box = page.get_by_role('button', name='임시저장', exact=True).bounding_box()
-    assert save_box['y'] + save_box['height'] <= 1000, 'save action visible without scrolling'
+    # The save bar sits at the end of the form; only the publish button floats in view.
+    save_box = page.get_by_role('button', name='검수 후 게시', exact=True).bounding_box()
+    assert save_box['y'] + save_box['height'] <= 1000, 'publish action visible without scrolling'
     page.get_by_label('공고 제목', exact=True).fill(TITLE)
     page.get_by_role('button', name='임시저장', exact=True).click()
     expect(page.locator('.manager-workspace .success-note')).to_contain_text('임시저장했습니다')
@@ -108,7 +115,7 @@ with sync_playwright() as p:
     page.get_by_role('button', name='검수 후 게시', exact=True).click()
     expect(page.locator('.manager-workspace .success-note')).to_contain_text('게시했습니다')
     expect(page.locator('.manager-editor-heading .tag')).to_have_text('게시 중')
-    page.locator('.back:visible').filter(has_text='공고 관리로 돌아가기').click()
+    page.locator('.back:visible').filter(has_text='공고 관리로').click()
     expect(page.locator('.manager-notice')).to_have_count(count_a + 1)
     no_overflow(page, 'manager mobile list')
     page.set_viewport_size({'width': 1440, 'height': 1000})
@@ -134,7 +141,7 @@ with sync_playwright() as p:
     exit_test(page)
 
     enter(page, '담당자 B')
-    page.locator('.manager-workspace-tabs').get_by_role('button', name='공고 관리', exact=True).click()
+    side(page, '공고 관리')
     assert page.locator('.manager-notice').count() >= 1
     expect(page.locator('.manager-list')).to_contain_text('캠퍼스 아이디어 공모')
     expect(page.locator('.manager-list')).not_to_contain_text(TITLE)
@@ -142,7 +149,7 @@ with sync_playwright() as p:
     exit_test(page)
 
     enter(page, '담당자 A')
-    page.locator('.manager-workspace-tabs').get_by_role('button', name='공고 관리', exact=True).click()
+    side(page, '공고 관리')
     card = page.locator('.manager-notice').filter(has_text=TITLE)
     card.get_by_role('button', name='집계 보기', exact=True).click()
     expect(page.locator('.manager-counts')).to_contain_text('비공개')
@@ -155,7 +162,7 @@ with sync_playwright() as p:
     page.screenshot(path=str(screenshots / 'manager-mobile-metrics.png'), full_page=True)
     page.set_viewport_size({'width': 1440, 'height': 1000})
     no_overflow(page, 'manager desktop metrics')
-    page.locator('.back:visible').filter(has_text='공고 관리로 돌아가기').click()
+    page.locator('.back:visible').filter(has_text='공고 관리로').click()
     page.locator('.manager-notice').filter(has_text=TITLE).get_by_role('button', name='공고 수정', exact=True).click()
     dialog_decision['accept'] = False
     page.get_by_role('button', name='게시 내리고 임시저장', exact=True).click()
@@ -164,7 +171,7 @@ with sync_playwright() as p:
     page.get_by_role('button', name='게시 종료', exact=True).click()
     expect(page.locator('.manager-workspace .success-note')).to_contain_text('게시를 종료했습니다')
     expect(page.locator('.manager-editor-heading .tag')).to_have_text('게시 종료')
-    page.locator('.back:visible').filter(has_text='공고 관리로 돌아가기').click()
+    page.locator('.back:visible').filter(has_text='공고 관리로').click()
     page.locator('.manager-template-details > summary').click()
     page.get_by_label('검수 초안 선택', exact=True).select_option('0')
     page.get_by_role('button', name='초안 불러오기', exact=True).click()
@@ -177,12 +184,12 @@ with sync_playwright() as p:
     dialog_decision['accept'] = False
     page.get_by_role('button', name='테스트 종료', exact=True).click()
     expect(page.get_by_label('공고 제목', exact=True)).to_have_value('[취업지원팀] 2026학년도 동계 직무 부트캠프 안내(현직자 멘토와 직무 경험)')
-    page.locator('.manager-workspace-tabs').get_by_role('button', name='담당자 대시보드', exact=True).click()
+    side(page, '담당자 대시보드')
     expect(page.get_by_label('공고 제목', exact=True)).to_be_visible()
-    page.locator('.sidebar').get_by_role('button', name='공고 관리', exact=True).click()
+    side(page, '공고 관리')
     expect(page.get_by_label('공고 제목', exact=True)).to_be_visible()
     dialog_decision['accept'] = True
-    page.locator('.sidebar').get_by_role('button', name='공고 관리', exact=True).click()
+    side(page, '공고 관리')
     expect(page.locator('.manager-list')).to_be_visible()
     exit_test(page)
     assert not errors, errors
@@ -196,7 +203,7 @@ with sync_playwright() as p:
     delayed.goto(BASE + '/account.html')
     delayed.wait_for_load_state('networkidle')
     enter(delayed, '담당자 A')
-    delayed.locator('.manager-workspace-tabs').get_by_role('button', name='공고 관리', exact=True).click()
+    side(delayed, '공고 관리')
     delayed.get_by_role('button', name='공고 등록', exact=True).click()
     delayed.get_by_label('공고 제목', exact=True).fill('저장 대기 중 이동 차단 검증')
     delayed.get_by_role('button', name='임시저장', exact=True).click()
@@ -204,8 +211,7 @@ with sync_playwright() as p:
     expect(delayed.get_by_role('button', name='테스트 종료', exact=True)).to_be_disabled()
     expect(delayed.get_by_role('button', name='로그아웃', exact=True)).to_be_disabled()
     expect(delayed.locator('.manager-workspace > .back')).to_be_disabled()
-    expect(delayed.locator('.manager-workspace-tabs').get_by_role('button', name='담당자 대시보드', exact=True)).to_be_disabled()
-    delayed.locator('.sidebar').get_by_role('button', name='학생 화면 보기', exact=True).click()
+    side(delayed, '담당자 대시보드')
     expect(delayed.get_by_label('공고 제목', exact=True)).to_have_value('저장 대기 중 이동 차단 검증')
     delayed.evaluate('window.finishManagerSave()')
     expect(delayed.locator('.manager-save-feedback')).to_contain_text('임시저장했습니다')

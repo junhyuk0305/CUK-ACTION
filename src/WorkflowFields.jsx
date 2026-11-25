@@ -1,15 +1,17 @@
 import React from 'react';
 import {DEMO} from './demo.js';
 
-export default function WorkflowFields({editing, change, testMode = false}) {
+// Site notices take applications on this site, so they have no per-round options or after-application steps.
+export default function WorkflowFields({editing, change, testMode = false, siteMode = false}) {
   const update = (key, index, patch) => change(key, editing[key].map((row, i) => i === index ? {...row, ...patch} : row));
   return <section className="panel manager-section workflow-fields">
-    <h3>신청 항목과 단계별 일정</h3>
+    <h3>{siteMode ? '마감 시각' : '신청 항목과 단계별 일정'}</h3>
     {DEMO && testMode && <p className="muted">이 기능은 테스트 공간에서 검증 중입니다.</p>}
     <div className="manager-fields">
       <label>마감 시각<input type="time" value={editing.deadlineTime || ''} onChange={e => change('deadlineTime', e.target.value)}/><small>한국 시간. 모르면 비워 두세요.</small></label>
       <label>마감 확인 상태<select value={editing.deadlineStatus || 'confirmed'} onChange={e => change('deadlineStatus', e.target.value)}><option value="confirmed">날짜 확인</option><option value="conflict">자료 불일치</option></select></label>
     </div>
+    {!siteMode && <>
     <div className="section-heading"><h3>기수별 신청 항목</h3><button type="button" className="text-button" onClick={() => change('options', [...(editing.options || []), {id: crypto.randomUUID(), label: '', deadline: '', deadlineTime: '', deadlineEvidence: '', applicationUrl: ''}])}>신청 항목 추가</button></div>
     <p className="muted">각 항목의 준비 상태를 따로 저장합니다.</p>
     {(editing.options || []).map((option, i) => <div className="manager-repeat" key={option.id}>
@@ -35,5 +37,6 @@ export default function WorkflowFields({editing, change, testMode = false}) {
         <label className="manager-wide">단계 {i + 1} 근거<textarea aria-label={`단계 ${i + 1} 근거`} value={step.evidence} onChange={e => update('followupSteps', i, {evidence: e.target.value})} required/></label>
       </div>
     </div>)}
+    </>}
   </section>;
 }

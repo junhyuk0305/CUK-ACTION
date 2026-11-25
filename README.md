@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-체험 계정은 개발 서버(`npm run dev`)와 검사용 빌드(`npm run build:check`)에만 있습니다. 배포 빌드(`npm run build`)에는 체험 계정과 시연 데이터가 들어가지 않습니다.
+체험 계정은 브라우저 검사용 서버(`npm run dev:validation`)와 검사용 빌드(`npm run build:check`)에만 있습니다. 개발 서버(`npm run dev`)와 배포 빌드(`npm run build`)는 실제 계정으로만 로그인하고, 체험 계정과 시연 데이터가 들어가지 않습니다.
 
 `/account.html`에서 **학생 A로 체험** 또는 **담당자 A로 체험**을 누릅니다. 학생 A/B와 담당자 A/B를 각각 사용할 수 있습니다. 테스트 종료 후 다른 계정으로 들어가면 각자의 화면을 확인할 수 있습니다. 테스트 데이터는 이 브라우저의 `cuk-action-test-v2`에 저장됩니다. 같은 탭에서 새로고침해도 테스트 계정이 유지됩니다. 개인정보는 입력하지 마세요.
 

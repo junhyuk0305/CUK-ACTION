@@ -7,7 +7,8 @@ import { PGlite } from '@electric-sql/pglite';
 const root = new URL('../../', import.meta.url);
 const db = new PGlite();
 await db.exec(await readFile(new URL('supabase/tests/bootstrap.sql', root), 'utf8'));
-for (const file of (await readdir(new URL('supabase/migrations/', root))).sort()) {
+// Storage migrations need the Supabase storage schema, which PGlite does not have.
+for (const file of (await readdir(new URL('supabase/migrations/', root))).filter(name => !name.includes('storage')).sort()) {
   await db.exec(await readFile(new URL(`supabase/migrations/${file}`, root), 'utf8'));
   if (file === '202611100001_initial.sql') await db.exec('create role service_role nologin');
 }

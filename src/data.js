@@ -1,4 +1,4 @@
-export const initialProfile={name:'',department:'',year:'',status:'',gpa:'',residence:'',interests:[]};
+export const initialProfile={name:'',studentNo:'',phone:'',department:'',year:'',status:'',gpa:'',residence:'',interests:[]};
 export const demoProfile={name:'가대생',department:'컴퓨터정보공학부',year:'3',status:'재학',gpa:'',residence:'',interests:['프로젝트','진로']};
 export const notices=[
  {id:'project',title:'대학생 프로젝트 프로그램',category:'프로젝트',department:'학생지원팀',deadline:'2026-11-15',summary:'관심 있는 문제를 팀 프로젝트로 풀어보세요.',label:'팀 프로젝트',color:'blue',rules:[{field:'status',op:'eq',value:'재학',label:'재학생',evidence:'지원 대상: 본교 재학생'},{field:'year',op:'in',value:['2','3','4'],label:'2~4학년',evidence:'지원 학년: 2학년 이상'},{field:'department',op:'in',value:['컴퓨터정보공학부','경영학과','글로벌경영학부','기타 학과'],label:'전 학과 지원 가능',evidence:'학과 제한 없이 지원 가능'}],tasks:['지원 동기 작성','활동 계획 작성','필수 서류 준비'],questions:[{label:'지원 동기',hint:'이 프로그램에 지원하는 이유와 관심 있는 문제를 적어 주세요.',max:1000},{label:'활동 계획',hint:'팀에서 맡을 역할과 실행할 계획을 적어 주세요.',max:1500}],followup:'결과 발표 후 선발 여부와 오리엔테이션 일정을 확인하세요.'},

@@ -1,5 +1,3 @@
-import {sourceRows,reviewRows,approvedRows,privateRows} from './guide.js';
-import {archiveAiInput} from './archive.js';
 import * as live from './backend.js';
 import {DEMO} from './demo.js';
 import {addDays,aggregateOverview,createScenarioEvents,createTestDatabase,migrateTestDatabase} from './test-fixtures.js';
@@ -71,36 +69,10 @@ export async function getManagerOverview({fromDate,toDate,source='activity'}){
  return {...aggregateOverview({notices:db.notices,events,ownerId:owner.id,managerIds,fromDate,toDate,source}),scenarioDate:db.fixtureAnchorDate};
 }
 
-function verifyGuideOwner(db,id){
- const u=manager();
- if(db.notices.some(n=>n.sourceUrl?.match(/[?&]articleNo=(\d+)(?:&|$)/)?.[1]===id&&n.owner_id!==u.id)||db.guides?.[id]&&db.guides[id].owner!==u.id)throw Error('관리할 수 없는 공고입니다.');
- return u.id;
-}
 export async function readGuide(id,publicOnly=false){
  if(DEMO&&!publicOnly&&testUser)return readDB().guides?.[id]?.approved??null;
  if(!live.supabase)return null;
  const {data,error}=await live.supabase.from('approved_guides').select('rows').eq('official_id',id).maybeSingle();
  if(error)throw Error('최신 안내를 불러오지 못했습니다.');
  return data?.rows??null;
-}
-export async function readGuideDraft(id){
- if(DEMO&&testUser){const db=readDB();verifyGuideOwner(db,id);return db.guides?.[id]?.draft||[];}
- const {data,error}=await live.supabase.from('guide_drafts').select('rows').eq('official_id',id).maybeSingle();
- if(error)throw Error('초안을 읽지 못했습니다.');return data?.rows||[];
-}
-export async function guideAction(action,id,rows){
- const text=archiveAiInput(id);if(!text)throw Error('검수 발췌가 없습니다.');
- if(DEMO&&testUser){
-  const db=readDB(),owner=verifyGuideOwner(db,id);
-  db.guides??={};const guide=db.guides[id]??={owner};
-  if(action==='extract')throw Error('테스트 공간에서는 모델 키를 사용하지 않습니다. 테스트 초안을 불러오세요.');
-  if(action==='sample')return reviewRows(sourceRows(text),text);
-  if(action==='approve')guide.approved=approvedRows(rows,text);
-  else if(action==='draft')guide.draft=privateRows(rows,text);
-  else throw Error('잘못된 요청입니다.');
-  writeDB(db);return;
- }
- const {data,error}=await live.supabase.functions.invoke('notice-guide',{body:{action,id,...(rows?{rows}:{})}});
- if(error){let message;try{message=(await error.context.json()).error;}catch{}throw Error(message||'AI 검수 서버에 연결하지 못했습니다. 다시 시도하세요.');}
- return data.rows;
 }

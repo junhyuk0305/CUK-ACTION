@@ -48,20 +48,27 @@ export function toggleSaved(saved, notice) {
   return isSavedNotice(notice, saved) ? saved.filter(id => id !== notice.id && !id.startsWith(notice.id + '::')) : [...saved, notice.id];
 }
 
-// In-app back buttons say where they go. The account detail returns to the page it was opened from.
-const detailBack = {home: '홈으로', explore: '공고 탐색으로', applications: '내 신청으로', saved: '관심 공고로', notifications: '알림으로', archive: '검색 결과로'};
+// In-app back buttons say where they go. The account detail returns to the page it was opened from,
+// or to the archive detail when it was opened there.
+const detailBack = {home: '홈으로', explore: '공고 탐색으로', applications: '내 신청으로', saved: '관심 공고로', notifications: '알림으로', archive: '실제 공고 보관함으로'};
 export function detailBackLabel(page, fromArchiveItem = false) {
-  return page === 'archive' && fromArchiveItem ? '보관함 공고로' : detailBack[page] || '목록으로';
+  return fromArchiveItem ? '보관함 공고로' : detailBack[page] || '목록으로';
 }
 
 // The public detail goes back to the list it was opened from, or to the full list for a direct link.
 export function publicBackLabel(returnTo) {
-  if (!returnTo) return '전체 공고 보기';
+  if (!returnTo) return '전체 공고로';
   return {'#browse': '전체 공고로', '#saved': '관심 공고로'}[returnTo.hash] || '홈으로';
 }
 
 export function preparationCount(notice) {
   return (notice.tasks?.length || 0) + (notice.questions?.length || 0);
+}
+
+// The card names checklist and writing counts apart, so the detail's checklist count matches.
+export function preparationLabel(notice) {
+  const parts = [notice.tasks?.length && `체크 ${notice.tasks.length}`, notice.questions?.length && `작성 ${notice.questions.length}`].filter(Boolean);
+  return parts.length ? parts.join(' · ') : '원문에서 신청';
 }
 
 export function startTab(notice) {
@@ -80,7 +87,7 @@ export function requirementsKey(notice) {
 
 export function withSavedApplication(notice, application) {
   const snapshot = application?.noticeSnapshot;
-  if (!snapshot) return notice;
+  if (!snapshot || notice.applyMode === 'site') return notice;
   return {...notice, questions: snapshot.questions, tasks: snapshot.tasks,
     formChanged: requirementsKey(snapshot) !== requirementsKey(notice), currentNotice: notice};
 }

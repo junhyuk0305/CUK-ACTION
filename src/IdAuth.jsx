@@ -36,7 +36,7 @@ export function IdAuth({staff,disabled=false}){
    <label>아이디<input name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={20} required disabled={disabled} value={id} onChange={e=>setId(e.target.value)}/></label>
    {mode!=='login'&&<p className="access-foot">아이디: {LOGIN_ID_RULE}. 비밀번호: {PASSWORD_RULE}.</p>}
    <label>{mode==='reset'?'새 비밀번호':'비밀번호'}<input name="password" type="password" minLength={8} autoComplete={mode==='login'?'current-password':'new-password'} required disabled={disabled} value={password} onChange={e=>setPassword(e.target.value)}/></label>
-   <button className="button primary" disabled={disabled||busy}>{busy?'확인 중':actions[mode]}<ArrowRight size={16}/></button>
+   <button className="button primary" disabled={disabled||busy}>{busy?<span className="loading-inline">확인 중</span>:actions[mode]}<ArrowRight size={16}/></button>
   </form>
   {!staff&&(mode==='login'?<><button type="button" className="text-button" onClick={()=>go('signup')}>처음이라면 회원가입</button><button type="button" className="text-button" onClick={()=>go('reset')}>비밀번호를 잊었다면 재설정</button></>:<button type="button" className="text-button" onClick={()=>go('login')}>로그인으로 돌아가기</button>)}
   {error&&<p role="alert" className="warning">{error}</p>}{message&&<p role="status" className="success-note">{message}</p>}

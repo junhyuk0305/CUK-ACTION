@@ -60,7 +60,7 @@ with sync_playwright() as p:
     page.get_by_role('button',name='제출 완료 표시 취소',exact=True).click(); stored(page)
     page.get_by_role('button',name='관심 등록',exact=True).click(); stored(page)
     page.get_by_role('button',name='알림',exact=True).click(); expect(page.locator('.notification')).to_have_count(1)
-    page.get_by_role('button',name='실제 공고 보관함',exact=True).click()
+    page.locator('.sidebar').get_by_role('button',name='공고 탐색',exact=True).click(); page.get_by_role('button',name='본선 공고 683건').click()
     page.get_by_role('textbox',name='실제 공고 검색').press_sequentially('CU12')
     expect(page.get_by_role('textbox',name='실제 공고 검색')).to_be_focused()
     expect(page.locator('.archive-list a[href$="articleNo=277473"]')).to_be_visible()

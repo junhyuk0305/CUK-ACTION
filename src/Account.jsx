@@ -87,7 +87,7 @@ export function AccountRoot({children}) {
   }
 
   if (DEMO && demo) return <ErrorBoundary>{children({...demo, logout: leaveDemo})}</ErrorBoundary>;
-  if (checking) return <main><p role="status">계정 확인 중입니다.</p></main>;
+  if (checking) return <main><p className="loading-state" role="status">계정 확인 중입니다.</p></main>;
   if (error) return <main className="access-main"><section className="panel access-card">
     <p role="alert">{error}</p><button className="button primary" onClick={() => {setChecking(true); retry(n=>n+1);}}>다시 확인</button>
     <button className="text-button" onClick={logout}>로그아웃</button>

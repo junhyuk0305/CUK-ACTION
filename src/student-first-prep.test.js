@@ -16,7 +16,12 @@ test('PS-05/FR-07: preparation counts tasks and questions; start opens writing f
 });
 
 test('PS-05/FR-07: cards show the preparation count and notices without preparation link to the source instead of starting', () => {
-  assert.match(main, /preparationCount\(n\)\?`준비 \$\{preparationCount\(n\)\}개`:'원문에서 신청'/);
+  const preparationLabel = call('preparationLabel');
+  assert.equal(preparationLabel({tasks: ['a', 'b'], questions: [{label: 'q'}]}), '체크 2 · 작성 1');
+  assert.equal(preparationLabel({tasks: ['a', 'b'], questions: []}), '체크 2');
+  assert.equal(preparationLabel({tasks: [], questions: [{label: 'q'}]}), '작성 1');
+  assert.equal(preparationLabel({tasks: [], questions: []}), '원문에서 신청');
+  assert.match(main, /<span>\{preparationLabel\(n\)\}<\/span>/);
   assert.match(main, /function start\(n,nextTab=startTab\(n\)\)/);
   assert.match(main, /const noPreparation=!!notice&&!hasApplication&&!preparationCount\(notice\)/);
   assert.match(main, /noPreparation\?<a className="button primary" href=\{safeLink\(notice\.applicationUrl\|\|notice\.sourceUrl\)\}[^]*?>원문에서 신청<ExternalLink/);
@@ -27,7 +32,7 @@ test('FR-01/D4: an archive item links to the published copy with the same source
   assert.equal(archiveNotice('100', notices).id, 'u1');
   assert.equal(archiveNotice('200', notices), undefined);
   assert.equal(archiveNotice('300', notices), undefined);
-  assert.match(main, /archiveTarget&&<button className="button primary" onClick=\{\(\)=>open\(archiveTarget\)\}>이 공고 준비하기/);
+  assert.match(main, /archiveTarget&&<button className="button primary" data-open=\{archiveTarget\.id\} onClick=\{\(\)=>open\(archiveTarget\)\}>이 공고 준비하기/);
 });
 
 test('FR-06/QE-25: the detail interest button targets the same parent notice as the list card', () => {
@@ -84,4 +89,22 @@ test('FR-06/QE-25: a session id saved earlier counts for the parent, and unsavin
 test('PS-11: completion messages are kept per notice and only replace that notice\'s own toast', () => {
   assert.match(main, /interestDone=useRef\(new Map\(\)\)/);
   assert.match(main, /setToast\(t=>t===owner\.text\?done:t\)/);
+});
+
+test('FRW-1: a manager in the student view sees a sidebar return button named for where it goes', () => {
+  assert.match(main, /const managerBackLabel=managerReturn\?'공고 집계로':'담당자 대시보드로';/);
+  assert.match(main, /<button className='nav-bottom' onClick=\{\(\)=>navigate\('manager','overview'\)\}><BarChart3 size=\{18\}\/>\{managerBackLabel\}<\/button>/);
+});
+
+test('FRW-3: archive rows with a published copy say they can be prepared in the app', () => {
+  assert.match(main, /\{excerpt&&archiveNotice\(r\.id,notices\)&&<> · <b>앱에서 준비 가능<\/b><\/>\}/);
+});
+
+test('FRW-4: starting a new application shows a toast', () => {
+  const start = main.slice(main.indexOf('function start(n'), main.indexOf('function updateApp'));
+  assert.match(start, /if\(!state\.applications\[n\.id\]\)setToast\('내 신청에 추가했습니다\.'\);setTab\(nextTab\);/);
+});
+
+test('FRW-5: notifications show the notice loading status next to existing alarms, not a second failure banner', () => {
+  assert.match(main, /\{alarms\.length>0&&noticeLoad==='loading'&&<LoadState state=\{noticeLoad\}\/>\}\{alarms\.length\?/);
 });

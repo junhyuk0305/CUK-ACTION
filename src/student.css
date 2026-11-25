@@ -1,4 +1,4 @@
-.session-strip{border:1px solid var(--line);background:var(--white);border-radius:10px;padding:var(--sp-1) var(--sp-2)}.session-strip .info-note{background:none;padding:0;font-size:11px}.session-strip .button{min-height:32px;padding:0 var(--sp-1);border:0;color:var(--muted)}.session-detail{margin-left:var(--sp-2);color:var(--muted);font-weight:400}.data-status{margin-bottom:var(--sp-2)}.bundle-section{margin:var(--sp-3) 0}.bundle-section .section-heading p{font-size:12px;margin-top:var(--sp-1)}.bundle-section h2{font-size:16px}.bundle-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-2)}.bundle-grid>button{text-align:left;display:flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line);background:var(--white);border-radius:12px;padding:var(--sp-2);gap:var(--sp-1);min-width:0}.bundle-grid>button.selected{background:var(--soft);border-color:var(--blue)}@media (hover: hover) and (pointer: fine){.bundle-grid>button:hover{background:var(--soft);border-color:var(--blue)}}.bundle-grid strong{font-size:13px}.bundle-grid>button>span:not(.bundle-number){font-size:11px;color:var(--muted);line-height:1.6;flex:1}.bundle-number{font-size:10px;letter-spacing:1px;color:var(--blue)}.bundle-grid small{display:flex;align-items:center;justify-content:space-between;width:100%;font-size:11px;color:var(--blue);margin-top:var(--sp-1)}.discovery-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3);font-size:12px;color:var(--muted)}.discovery-controls label{display:flex;align-items:center;gap:var(--sp-1);font-size:11px}.discovery-controls select{font-size:11px;padding:var(--sp-1)}.categories{flex-wrap:wrap}.menu-backdrop{display:none}.preparation-gate{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3)}.preparation-gate p{font-size:12px;color:var(--muted);margin-top:var(--sp-1)}.preparation-gate b{font-size:13px}.question textarea:disabled{background:var(--bg);cursor:not-allowed}.checklist-remaining{font-size:12px;color:var(--muted);margin:var(--sp-2) 0}.application-tabs{margin-bottom:var(--sp-3);flex-wrap:wrap}.application-next{font-size:12px;line-height:1.7;color:var(--muted);margin-bottom:var(--sp-2)}.manager-shell .side-note{display:none}.manager-shell .profile-mini{margin-top:var(--sp-2)}.manager-shell main{max-width:1600px}.manager-shell .sidebar-bottom{margin-top:auto}.manager-shell .breadcrumb b{font-weight:600}
+.session-strip{border:1px solid var(--line);background:var(--white);border-radius:10px;padding:var(--sp-1) var(--sp-2)}.session-strip .info-note{background:none;padding:0;font-size:11px}.session-strip .button{min-height:32px;padding:0 var(--sp-1);border:0;color:var(--muted)}.session-detail{margin-left:var(--sp-2);color:var(--muted);font-weight:400}.data-status{margin-bottom:var(--sp-2)}.bundle-section{margin:var(--sp-3) 0}.bundle-section .section-heading p{font-size:12px;margin-top:var(--sp-1)}.bundle-section h2{font-size:16px}.bundle-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-2)}.bundle-grid>button{text-align:left;display:flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line);background:var(--white);border-radius:12px;padding:var(--sp-2);gap:var(--sp-1);min-width:0}.bundle-grid>button.selected{background:var(--soft);border-color:var(--blue)}@media (hover: hover) and (pointer: fine){.bundle-grid>button:hover{background:var(--soft);border-color:var(--blue)}}.bundle-grid strong{font-size:13px}.bundle-grid>button>span:not(.bundle-number){font-size:11px;color:var(--muted);line-height:1.6;flex:1}.bundle-number{font-size:10px;letter-spacing:1px;color:var(--blue)}.bundle-grid small{display:flex;align-items:center;justify-content:space-between;width:100%;font-size:11px;color:var(--blue);margin-top:var(--sp-1)}.discovery-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3);font-size:12px;color:var(--muted)}.discovery-controls label{display:flex;align-items:center;gap:var(--sp-1);font-size:11px}.discovery-controls select{font-size:11px;padding:var(--sp-1)}.categories{flex-wrap:wrap}.menu-backdrop{display:none}.preparation-gate{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3)}.preparation-gate p{font-size:12px;color:var(--muted);margin-top:var(--sp-1)}.preparation-gate b{font-size:13px}.question textarea:disabled{background:var(--bg);cursor:not-allowed}.checklist-remaining{font-size:12px;color:var(--muted);margin:var(--sp-2) 0}.application-tabs{margin-bottom:var(--sp-3);flex-wrap:wrap}.application-next{font-size:12px;line-height:1.7;color:var(--muted);margin-bottom:var(--sp-2)}.manager-shell .side-note{display:none}.manager-shell .profile-mini{margin-top:var(--sp-2)}.manager-shell main{max-width:1600px}.manager-shell .sidebar-bottom{margin-top:auto}
 @media(max-width:1100px){.bundle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){.session-strip{gap:var(--sp-1);padding:var(--sp-1)}.session-strip .info-note{flex:1!important;font-size:10px;line-height:1.6}.session-detail{display:block;margin:0;font-size:9px}.session-strip .button{font-size:10px}.bundle-grid{gap:var(--sp-1)}.bundle-grid>button{padding:var(--sp-2)}.bundle-grid strong{font-size:12px}.bundle-grid>button>span:not(.bundle-number){font-size:10px}.bundle-section .section-heading p{font-size:11px}.discovery-controls{gap:var(--sp-1)}.discovery-controls>.row{gap:var(--sp-1)}.discovery-controls>span{font-size:11px}.discovery-controls label{font-size:10px}.preparation-gate{padding:var(--sp-2);flex-wrap:wrap}.preparation-gate .button{width:100%}.menu-backdrop{display:block;position:fixed;inset:64px 0 0;background:#14254b66;z-index:19;cursor:default}.sidebar.open{bottom:0;max-height:calc(100dvh - 64px);overflow-y:auto}.sidebar .workspace-label{margin-top:var(--sp-3)}.sidebar .side-note{display:none}.categories.tabs button{padding:var(--sp-1);font-size:11px}.detail-tabs{gap:var(--sp-2)}.application-tabs button{padding:var(--sp-1);font-size:11px}}
 
@@ -24,31 +24,51 @@
 .detail-tabs{container-type:inline-size}
 .detail-tabs button{white-space:nowrap;flex:none}
 @container (max-width:300px){.detail-tabs button>span{display:none}.detail-tabs button+button{margin-left:calc(var(--sp-1) * -1)}}
+/* LC-03 대체: 컨테이너 쿼리가 없는 브라우저(Chrome 105, Safari 16 미만)는 칸 폭 대신 화면 폭으로 맞춘다. 탭 칸 폭 = 화면 폭 - 32px */
+@supports not (container-type:inline-size){@media(max-width:332px){.detail-tabs button>span{display:none}.detail-tabs button+button{margin-left:calc(var(--sp-1) * -1)}}}
 /* LC-04: 관심 분야는 줄을 바꿔 놓고 글자는 감지 않는다 */
 .interest-options{flex-wrap:wrap}
 .interest-options button{white-space:nowrap;min-height:44px}
 /* LC-08: 상단 메뉴, 알림, 프로필 누를 영역 44px. 프로필 원 크기는 그대로 */
 .topbar .icon-button{min-width:44px;min-height:44px}
-.topbar .avatar.small{width:44px;height:44px;background:none;border:0;position:relative;isolation:isolate}
-.topbar .avatar.small::before{content:'';position:absolute;inset:6px;z-index:-1;border-radius:50%;background:var(--soft);border:1px solid #dce4f7}
-/* LC-17: 경로 글자를 세로로 쪼개지 않는다. 좁으면 앞부분을 줄임표로 줄인다 */
-.topbar>.row:first-child,.breadcrumb{min-width:0}
-.breadcrumb-root{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.breadcrumb-root{flex:0 100 auto}
-.breadcrumb b{flex:0 1 auto;min-width:min-content;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;word-break:keep-all;line-height:1.3}
-.breadcrumb svg{flex:none}
 /* S1 이음: 프로필 창 아래 안내를 세 칸이 아니라 위아래로 놓는다 */
 .data-note{flex-direction:column;align-items:flex-start}
-/* LC-17: 경로 칸이 아주 좁으면 앞부분 '나의 캠퍼스'를 숨기고 현재 위치만 보인다 */
-.topbar>.row:first-child{flex:1 1 auto;container-type:inline-size}
-@container (max-width:190px){.breadcrumb-root,.breadcrumb svg{display:none}}
+@container (max-width:190px){}
+/* LC-17 대체: 컨테이너 쿼리가 없는 브라우저(Chrome 105, Safari 16 미만)는 칸 폭 대신 화면 폭으로 맞춘다. 학생 화면 경로 칸 폭 = 화면 폭 - 128px */
+@supports not (container-type:inline-size){}
 /* LC-02 주변: 큰 글씨에서 '이어서 준비하기'가 오늘 할 일 상자 밖으로 나가지 않게 한다 */
 .hero-bottom{flex-wrap:wrap}
 /* LC-14: 체크리스트 줄의 이동 버튼이 칸을 넘으면 다음 줄로 보낸다 */
 .checklist label{flex-wrap:wrap}
 .hero-bottom .button{max-width:100%;white-space:normal}
-/* W4 (S4): 경로 맨 앞 버튼 누를 영역 44px */
-.breadcrumb-root{min-height:44px}
 /* W3 (S4): "제출 완료 표시"를 1배에서 한 줄로. 좁은 폭에서 숫자를 이름 위에 놓고, 감길 때는 낱말 단위로 */
 @media(max-width:680px){.stats button{flex-direction:column;gap:0;padding-inline:2px}}
 .stats span{word-break:keep-all}
+
+.notice-blocks p{white-space:pre-wrap;overflow-wrap:anywhere}
+.notice-blocks img{display:block;max-width:100%;height:auto}
+.notice-blocks{margin-top:var(--sp-2)}
+.notice-blocks>*+*{margin-top:var(--sp-1)}
+.notice-blocks>*+h3{margin-top:var(--sp-3)}
+
+/* 사이트 신청서: 긴 입력은 760px까지, 자격 조건은 제목 옆에 판정을 둔다 */
+.site-form .question,.site-form .rule-check{max-width:760px}
+.rule-check{margin:var(--sp-3) 0;padding-bottom:var(--sp-3);border-bottom:1px solid var(--line)}
+.rule-check>p{margin-top:var(--sp-1);font-size:12px}
+.rule-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-1)}
+.rule-title .status-text{margin-left:0}
+.rule-check .profile-fields{margin:var(--sp-2) 0 0}
+.site-form>.row{margin-top:var(--sp-2)}
+.rule-check .claim-check{display:flex;align-items:center;gap:var(--sp-1);min-height:44px;margin-top:var(--sp-1)}
+.site-form>.warning,.site-form>.success-note{max-width:760px}
+/* 내 신청의 사이트 신청 줄: 목록 묶음 밖에 있어 줄 사이를 따로 띄운다 */
+.site-application-row{align-items:center;margin-bottom:var(--sp-3)}
+@media(min-width:681px){.site-application-row>.button{justify-self:end}}
+dialog.modal{border:0;color:var(--ink);max-width:calc(100% - 2 * var(--sp-2))}
+dialog.modal::backdrop{background:#14254b66}
+
+.profile-setup{max-width:840px;margin:auto}
+.student-profile>.panel{margin-bottom:var(--sp-2)}
+.student-profile fieldset{border:0;margin:0;padding:0;min-width:0}
+.student-profile h2:not(:first-child),.student-profile h3,.student-profile .modal-actions{margin-top:var(--sp-3)}
+.student-profile .profile-fields{margin:var(--sp-2) 0}

@@ -149,3 +149,11 @@ test('live notice publication applies workflow validation before reaching the se
   await assert.rejects(() => saveNotice(valid), /계정 서버가 연결되지 않았습니다/);
   await assert.rejects(() => saveNotice({...valid, status: 'draft', options: [{id: ''}]}), /계정 서버가 연결되지 않았습니다/);
 });
+
+test('a site notice ignores the saved snapshot, so label edits after publishing do not show the form change box', () => {
+  const saved = {id: 's1', applyMode: 'site', questions: [{id: 'q1', type: 'short', label: '학점', max: 10, required: true}], tasks: []};
+  const edited = {...saved, questions: [{...saved.questions[0], label: '직전 학기 학점'}]};
+  const result = withSavedApplication(edited, {noticeSnapshot: saved});
+  assert.equal(result, edited);
+  assert.equal(result.formChanged, undefined);
+});

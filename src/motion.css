@@ -23,8 +23,8 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   button, .button, .notice-card, .archive-list a,
-  .bar nav :is(a, button), .chips button, .feature-link, .pager button, .mark,
-  .more, .reset, .actions > *, .search, .back, .rows .row,
+  .sidebar nav a, .feature-link, .pager button, .mark,
+  .actions > *, .search, .back, .rows .notice-row,
   .bundle-grid > button, .overview-kpi, .overview-due, .overview-review-action {
     transition-property: background-color, border-color, color, box-shadow, scale;
     transition-duration: var(--motion-feedback), var(--motion-feedback), var(--motion-feedback), var(--motion-feedback), var(--motion-press);
@@ -64,7 +64,7 @@
   to { opacity: 1; transform: translateX(0); }
 }
 @media (hover: hover) and (pointer: fine) {
-  .chips button:not([aria-pressed=true]):hover, .more:hover, .mark:hover, .reset:hover, .actions .secondary:hover { background: var(--pale); }
+  .mark:hover, .actions .secondary:hover { background: var(--soft); }
   .pager button:hover { background: #ffffff24; border-radius: 50%; }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -77,4 +77,52 @@
 .mark[aria-pressed=true] svg, .actions .secondary[aria-pressed=true] svg { fill: currentColor; scale: 1.12; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* 로딩 표시는 모든 화면에서 같은 회전 스피너를 쓴다 */
+@keyframes loading-spin { to { transform: rotate(360deg); } }
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.loading-state::before {
+  content: "";
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: loading-spin .8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-state::before { animation-duration: 2s; }
+}
+
+/* 버튼, 저장 상태처럼 글자 한 줄짜리 로딩은 글자 앞에 작은 스피너를 붙인다 */
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+p.loading-inline { display: flex; }
+.loading-inline::before {
+  content: "";
+  flex: none;
+  width: .9em;
+  height: .9em;
+  box-sizing: border-box;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: loading-spin .8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-inline::before { animation-duration: 2s; }
 }

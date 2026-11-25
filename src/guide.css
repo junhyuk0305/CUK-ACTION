@@ -3,8 +3,4 @@
 .guide-facts p{margin:3px 0}
 .guide-facts summary,.guide-facts a{cursor:pointer;color:#164b8c;text-decoration:underline}
 .guide-facts details,.guide-facts small{font-size:.88rem}
-.guide-review fieldset{min-width:0;margin:12px 0;border:1px solid #d9dfeb;border-radius:8px;padding:12px}
-.guide-review label{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:8px 0}
-.guide-review input,.guide-review select{max-width:100%;padding:6px}
-.guide-review button,.guide-facts button{padding:6px 12px;margin:4px;border:1px solid #bcc8db;border-radius:6px}
-@media(max-width:600px){.bar:has(a[href="/account.html"]){flex-wrap:wrap;padding-block:8px;gap:6px}.bar nav{flex-wrap:wrap;font-size:13px}}
+.guide-facts button{padding:6px 12px;margin:4px;border:1px solid #bcc8db;border-radius:6px}

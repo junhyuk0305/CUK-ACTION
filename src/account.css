@@ -9,3 +9,7 @@
 .access-card .text-button{display:flex;align-items:center;min-height:44px}
 /* W4 (S4): 처리방침 링크 누를 영역 44px */
 .access-foot a,.data-note a{padding-block:15px}
+/* 로그인 왼쪽 배경: 학교 사진 + 글씨가 읽히는 남색 막 */
+.access-intro{background:linear-gradient(180deg,rgba(12,46,134,.45),rgba(12,46,134,.85)),url(/campus.webp) center/cover no-repeat;color:#fff}
+.access-intro .brand,.access-intro h1{color:#fff}
+.access-intro p{color:rgba(255,255,255,.85)}
