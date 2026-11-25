@@ -3,6 +3,14 @@ import {initialProfile} from './data.js';
 import {loadStudentState,saveStudentState,recordActivity} from './gateway.js';
 
 export const freshState=()=>({profile:{...initialProfile,interests:[]},saved:[],applications:{},events:[],read:[]});
+// The server rejects unpublished notices (42501) and changed options or steps (P0001). A retry
+// cannot succeed, so only that event is dropped. Network failures stop here and are retried.
+// 42501 also means a missing login or function permission (a token refresh failed), so it is
+// dropped only with the unpublished-notice message raised in 202611240003 and 202611240004.
+const rejected=e=>e?.cause?.code==='P0001'||(e?.cause?.code==='42501'&&e.cause.message==='게시된 공고가 아닙니다.');
+export async function recordEvents(events,recorded,record){
+ for(const e of events){if(recorded.has(e.id))continue;if(!e.demo){try{await record(e.notice,e.type,e.optionId,e.stepId);}catch(error){if(!rejected(error))throw error;}}recorded.add(e.id);}
+}
 export function useStudentState(user){
  const [state,replace]=useState(freshState),[loaded,setLoaded]=useState(false),[status,setStatus]=useState('loading'),[error,setError]=useState(''),[activityError,setActivityError]=useState('');
  const latest=useRef(state),saved=useRef(''),inFlight=useRef(null),alive=useRef(true),recorded=useRef(new Set()),ready=useRef(false),version=useRef(null),conflict=useRef(false);
@@ -29,7 +37,7 @@ export function useStudentState(user){
     }catch(e){if(e.code==='conflict')conflict.current=true;if(alive.current){setError(e.message);setStatus(conflict.current?'conflict':'error');}return false;}
     if(!trackingFailed){
      try{
-      for(const e of snapshot.events){if(recorded.current.has(e.id))continue;if(!e.demo)await recordActivity(e.notice,e.type,e.optionId,e.stepId);recorded.current.add(e.id);}
+      await recordEvents(snapshot.events,recorded.current,recordActivity);
       if(alive.current)setActivityError('');
      }catch(e){trackingFailed=true;if(alive.current)setActivityError(e.message);}
     }

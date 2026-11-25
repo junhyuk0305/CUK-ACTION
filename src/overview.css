@@ -27,3 +27,19 @@
  .overview-notice-next .button { justify-content: center; }
  .overview-notice-detail h4 { font-size: 15px; }
 }
+
+/* 좁은 폭과 큰 글씨 (묶음 11) */
+@media(max-width:680px){
+ /* LC-10: '전체 공고'를 한 줄로 두고, 좁으면 한 열로 놓는다 */
+ .overview-portfolio{grid-template-columns:repeat(auto-fit,minmax(min(100%,124px),1fr))}
+ .overview-portfolio button{white-space:nowrap}
+ /* S2 이음: 긴 지표 이름이 여러 줄로 감기면 한 열로 놓는다 */
+ .overview-kpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr))}
+}
+/* LC-15: 단계 이름 칸이 좁으면 이름을 윗줄로 올린다 */
+.overview-stages{container-type:inline-size}
+@container (max-width:240px){.overview-stages>div{grid-template-columns:minmax(0,1fr) 48px}.overview-stages>div>span{grid-column:1/-1}}
+/* LC-15 주변: 공고별 비교 제목과 정렬이 좁은 칸을 넘지 않게 한다 */
+.overview-comparison .section-heading{flex-wrap:wrap}
+.overview-sort{min-width:0;max-width:100%}
+.overview-sort select{min-width:0;max-width:100%}

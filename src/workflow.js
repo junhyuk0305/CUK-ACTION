@@ -32,6 +32,47 @@ export function deadlineText(notice, now = new Date()) {
   return `${notice.deadline} ${suffix}${deadlineState(notice, now) === 'closed' ? ' / 마감' : ''}`;
 }
 
+// Shown with deadlineText when deadlineState is 'unknown', so the two never contradict.
+export function unknownDeadlineNote(notice) {
+  if (notice.deadlineStatus === 'conflict') return '마감이 확정되지 않았습니다. 신청 전 담당자 확인이 필요합니다.';
+  if (!notice.deadline) return '마감일이 없는 공고입니다. 신청 가능 여부와 인원 제한을 원문에서 확인하세요.';
+  return '오늘 마감입니다. 마감 시각은 원문에서 확인하세요.';
+}
+
+// A parent notice also counts as saved when one of its session ids (parent::option) was saved earlier.
+export function isSavedNotice(notice, saved) {
+  return saved.includes(notice.id) || saved.some(id => id.startsWith(notice.id + '::'));
+}
+
+export function toggleSaved(saved, notice) {
+  return isSavedNotice(notice, saved) ? saved.filter(id => id !== notice.id && !id.startsWith(notice.id + '::')) : [...saved, notice.id];
+}
+
+// In-app back buttons say where they go. The account detail returns to the page it was opened from.
+const detailBack = {home: '홈으로', explore: '공고 탐색으로', applications: '내 신청으로', saved: '관심 공고로', notifications: '알림으로', archive: '검색 결과로'};
+export function detailBackLabel(page, fromArchiveItem = false) {
+  return page === 'archive' && fromArchiveItem ? '보관함 공고로' : detailBack[page] || '목록으로';
+}
+
+// The public detail goes back to the list it was opened from, or to the full list for a direct link.
+export function publicBackLabel(returnTo) {
+  if (!returnTo) return '전체 공고 보기';
+  return {'#browse': '전체 공고로', '#saved': '관심 공고로'}[returnTo.hash] || '홈으로';
+}
+
+export function preparationCount(notice) {
+  return (notice.tasks?.length || 0) + (notice.questions?.length || 0);
+}
+
+export function startTab(notice) {
+  return notice.questions?.length ? 'write' : 'prepare';
+}
+
+// The published copy of an archive item, matched by sourceArchiveId.
+export function archiveNotice(archiveId, notices) {
+  return notices.find(n => n.sourceArchiveId === archiveId && !n.unpublished);
+}
+
 export function requirementsKey(notice) {
   return JSON.stringify([notice.rules, notice.deadline, notice.deadlineTime || '', notice.deadlineStatus || '', notice.deadlineEvidence,
     notice.applicationUrl, notice.tasks, notice.questions, notice.followup, notice.followupSteps || []]);
@@ -42,6 +83,20 @@ export function withSavedApplication(notice, application) {
   if (!snapshot) return notice;
   return {...notice, questions: snapshot.questions, tasks: snapshot.tasks,
     formChanged: requirementsKey(snapshot) !== requirementsKey(notice), currentNotice: notice};
+}
+
+// A saved application missing from the current list counts as unpublished only after the list has loaded.
+// Before that its copy is marked pending, so home and browse do not show it as a current notice.
+export function withEndedApplications(current, applications, listReady) {
+  return [...current.map(n => withSavedApplication(n, applications[n.id])),
+    ...Object.entries(applications).filter(([id, a]) => a.noticeSnapshot && !current.some(n => n.id === id))
+      .map(([, a]) => listReady ? {...a.noticeSnapshot, unpublished: true} : {...a.noticeSnapshot, pendingSnapshot: true})];
+}
+
+// Saved ids found in neither list. A list that has not loaded (null) holds the judgment.
+export function endedSavedIds(saved, notices, archive) {
+  if (!notices || !archive) return [];
+  return saved.filter(id => !notices.some(n => n.id === id) && !archive.some(r => r.id === id));
 }
 
 export function followupProgress(notice, application = {}) {

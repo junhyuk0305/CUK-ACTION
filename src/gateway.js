@@ -11,6 +11,7 @@ export const testAccounts=[
  {id:'test-manager-a',name:'담당자 A',role:'manager'},
  {id:'test-manager-b',name:'담당자 B',role:'manager'},
 ];
+const managerIds=testAccounts.filter(u=>u.role==='manager').map(u=>u.id);
 const KEY='cuk-action-test-v2';
 let testUser=null;
 export function setTestUser(user){testUser=user;}
@@ -27,7 +28,11 @@ export async function listPublishedNotices(){return DEMO&&testUser?readDB().noti
 export async function listManagedNotices(){if(!DEMO||!testUser)return live.listManagedNotices();return readDB().notices.filter(n=>n.owner_id===manager().id);}
 export async function saveNotice(value){
  if(!DEMO||!testUser){if(value.status==='published')validateWorkflow(value);return live.saveNotice(value);}
- const u=manager(),db=readDB();if(value.id)ownNotice(db,value.id);
+ const u=manager(),db=readDB(),{insertId,...notice}=value;
+ // Same rules as backend.js: a new notice keeps the id chosen in the editor, and an existing one saves only over the version it was opened from.
+ const id=value.id||insertId,stored=id&&db.notices.find(n=>n.id===id);
+ if(value.id||stored)ownNotice(db,id);
+ if(value.id&&stored.updated_at!==value.updated_at)throw live.conflictError();
  if(value.status==='published'){
   validateWorkflow(value);
   const textFields=['title','department','summary'];
@@ -37,8 +42,8 @@ export async function saveNotice(value){
   if(value.reviewed!==true||textFields.some(k=>typeof value[k]!=='string'||!value[k].trim())||!sourceOk||!applicationOk||!evidenceOk||(value.rules||[]).some(r=>!r.label?.trim()||!r.evidence?.trim()))throw Error('게시하려면 기본 정보, 신청 경로, 조건과 마감 근거를 검수하세요.');
   if(value.questions?.some(q=>!q.label?.trim()||!Number.isInteger(q.max)||q.max<1||q.max>10000))throw Error('문항명과 1~10000자 범위의 글자 수를 확인하세요.');
  }
- const next={...value,id:value.id||crypto.randomUUID(),owner_id:u.id,dataKind:'test',updated_at:new Date().toISOString()};
- db.notices=value.id?db.notices.map(n=>n.id===value.id?next:n):[next,...db.notices];writeDB(db);return next;
+ const next={...notice,id:id||crypto.randomUUID(),owner_id:u.id,dataKind:'test',updated_at:new Date().toISOString()};
+ db.notices=stored?db.notices.map(n=>n.id===id?next:n):[next,...db.notices];writeDB(db);return next;
 }
 export async function recordActivity(noticeId,type,optionId,stepId){
  if(!DEMO||!testUser)return live.recordActivity(noticeId,type,optionId,stepId);
@@ -50,12 +55,12 @@ export async function recordActivity(noticeId,type,optionId,stepId){
 export async function getNoticeMetrics(id,fromDate,toDate){
  if(!DEMO||!testUser)return live.getNoticeMetrics(id,fromDate,toDate);
  const db=readDB();ownNotice(db,id);
- const {counts}=aggregateOverview({notices:db.notices.filter(n=>n.id===id),events:db.events,ownerId:testUser.id,fromDate,toDate,source:'activity'});
+ const {counts}=aggregateOverview({notices:db.notices.filter(n=>n.id===id),events:db.events,ownerId:testUser.id,managerIds,fromDate,toDate,source:'activity'});
  const notice=db.notices.find(n=>n.id===id);
- const optionCounts=(notice.options||[]).map(option=>({id:option.id,label:option.label,counts:aggregateOverview({notices:[notice],events:db.events.filter(e=>e.option_id===option.id),ownerId:testUser.id,fromDate,toDate,source:'activity'}).counts}));
+ const optionCounts=(notice.options||[]).map(option=>({id:option.id,label:option.label,counts:aggregateOverview({notices:[notice],events:db.events.filter(e=>e.option_id===option.id),ownerId:testUser.id,managerIds,fromDate,toDate,source:'activity'}).counts}));
  const suppress=count=>count>0&&count<5?null:count;
  const subjects=notice.options?.length?applicationOptions(notice):[notice];
- const followupCounts=subjects.flatMap(n=>(n.followupSteps||[]).map(step=>({label:(n.optionId?n.label+' / ':'')+step.label,count:suppress(Object.entries(db.students).filter(([studentId])=>studentId!==testUser.id).map(([,student])=>student).filter(student=>followupProgress(n,student.applications?.[n.id]).rows.find(r=>r.id===step.id)?.checked).length)})));
+ const followupCounts=subjects.flatMap(n=>(n.followupSteps||[]).map(step=>({label:(n.optionId?n.label+' / ':'')+step.label,count:suppress(Object.entries(db.students).filter(([studentId])=>studentId!==testUser.id&&!managerIds.includes(studentId)).map(([,student])=>student).filter(student=>followupProgress(n,student.applications?.[n.id]).rows.find(r=>r.id===step.id)?.checked).length)})));
  const responses=id==='00000000-0000-4000-8000-000000000001'&&toDate===db.fixtureAnchorDate&&fromDate===addDays(toDate,-30)?[{source:'가상 응답',zero:false,counts:{'대상':5,'신청 경로':null,'준비물':5}}]:[];
  return {noticeId:id,fromDate,toDate,counts,responses,optionCounts,followupCounts,denominator:counts.view,denominatorLabel:'선택 기간에 해당 공고를 상세 조회한 고유 학생 수',suppressionThreshold:5};
 }
@@ -63,7 +68,7 @@ export async function getManagerOverview({fromDate,toDate,source='activity'}){
  if(!DEMO||!testUser)return live.getManagerOverview(fromDate,toDate);
  const owner=manager(),db=readDB();
  const events=source==='sample'?createScenarioEvents(db.fixtureAnchorDate):db.events;
- return {...aggregateOverview({notices:db.notices,events,ownerId:owner.id,fromDate,toDate,source}),scenarioDate:db.fixtureAnchorDate};
+ return {...aggregateOverview({notices:db.notices,events,ownerId:owner.id,managerIds,fromDate,toDate,source}),scenarioDate:db.fixtureAnchorDate};
 }
 
 function verifyGuideOwner(db,id){

@@ -29,7 +29,7 @@ export default function WorkflowFields({editing, change, testMode = false}) {
       <div className="section-heading"><b>후속 단계 {i + 1}</b><button type="button" className="text-button" onClick={() => change('followupSteps', editing.followupSteps.filter((_, j) => i !== j).map(s => s.requires === step.id ? {...s, requires: ''} : s))}>후속 단계 {i + 1} 삭제</button></div>
       <div className="manager-fields">
         <label>단계 {i + 1} 이름<input value={step.label} onChange={e => update('followupSteps', i, {label: e.target.value})} required/></label>
-        <label>단계 {i + 1} 선행 조건<select value={step.requires || ''} onChange={e => update('followupSteps', i, {requires: e.target.value})}><option value="">제출 완료 자기보고</option>{editing.followupSteps.slice(0, i).map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
+        <label>단계 {i + 1} 선행 조건<select value={step.requires || ''} onChange={e => update('followupSteps', i, {requires: e.target.value})}><option value="">학생이 표시한 제출 완료</option>{editing.followupSteps.slice(0, i).map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
         <label>단계 {i + 1} 기한<input type="date" value={step.deadline || ''} onChange={e => update('followupSteps', i, {deadline: e.target.value})}/><small>미확인 기한은 비워 두세요.</small></label>
         <label>단계 {i + 1} 시각<input type="time" value={step.deadlineTime || ''} onChange={e => update('followupSteps', i, {deadlineTime: e.target.value})}/></label>
         <label className="manager-wide">단계 {i + 1} 근거<textarea aria-label={`단계 ${i + 1} 근거`} value={step.evidence} onChange={e => update('followupSteps', i, {evidence: e.target.value})} required/></label>

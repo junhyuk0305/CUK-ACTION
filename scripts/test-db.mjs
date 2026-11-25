@@ -16,6 +16,7 @@ await db.exec(await readFile(new URL('supabase/migrations/202611240003_option_ac
 await db.exec(await readFile(new URL('supabase/migrations/202611240004_followup_activity.sql',root),'utf8'));
 await db.exec(await readFile(new URL('supabase/migrations/202611240005_open_notices.sql',root),'utf8'));
 await db.exec(await readFile(new URL('supabase/migrations/202611250001_public_notices.sql',root),'utf8'));
+await db.exec(await readFile(new URL('supabase/migrations/202611250002_student_only_metrics.sql',root),'utf8'));
 const ids = Object.fromEntries(['studentA','studentB','managerA','managerB','studentC','studentD','studentE','studentF'].map((name,i)=>[name,`00000000-0000-4000-8000-${String(i+1).padStart(12,'0')}`]));
 for (const [name,id] of Object.entries(ids)) await db.query('insert into auth.users(id,email) values ($1,$2)', [id,loginEmail(name)]);
 const protectedStudent='00000000-0000-4000-8000-000000000099';
@@ -453,3 +454,5 @@ try {
   });
   console.log(`\n${passed} database checks passed against PostgreSQL RLS in PGlite. Supabase Auth delivery/network are not exercised.`);
 } finally { await db.close(); }
+await import('../supabase/tests/student-only-metrics.mjs');
+await import('../supabase/tests/notice-save.test.mjs');

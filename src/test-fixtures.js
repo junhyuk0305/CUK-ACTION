@@ -69,13 +69,14 @@ export function createScenarioEvents(anchor=koreanDate()){
  return events;
 }
 
-export function aggregateOverview({notices,events,ownerId,fromDate,toDate,source}){
+// Manager accounts are left out like migration 202611250002; only student activity is counted.
+export function aggregateOverview({notices,events,ownerId,managerIds=[],fromDate,toDate,source}){
  const validDay=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+'T00:00:00Z'))&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;
  if(!validDay(fromDate)||!validDay(toDate)||fromDate>toDate||(Date.parse(toDate)-Date.parse(fromDate))/86400000>366)throw Error('집계 기간은 올바른 날짜로 최대 367일까지 선택하세요.');
  if(!['sample','activity'].includes(source))throw Error('집계 데이터 구분을 확인하세요.');
  const owned=notices.filter(n=>n.owner_id===ownerId),ids=new Set(owned.map(n=>n.id));
  const from=Date.parse(fromDate+'T00:00:00+09:00'),to=Date.parse(addDays(toDate,1)+'T00:00:00+09:00');
- const relevant=events.filter(e=>ids.has(e.notice_id)&&e.user_id!==ownerId&&Date.parse(e.created_at)>=from&&Date.parse(e.created_at)<to);
+ const relevant=events.filter(e=>ids.has(e.notice_id)&&e.user_id!==ownerId&&!managerIds.includes(e.user_id)&&Date.parse(e.created_at)>=from&&Date.parse(e.created_at)<to);
  const countsFor=rows=>Object.fromEntries(activityTypes.map(type=>{const n=new Set(rows.filter(e=>e.type===type).map(e=>e.user_id)).size;return [type,n>0&&n<5?null:n];}));
  const counts=countsFor(relevant),trend=[],daily=new Map();
  for(const event of relevant){const day=new Date(Date.parse(event.created_at)+9*60*60*1000).toISOString().slice(0,10);if(!daily.has(day))daily.set(day,[]);daily.get(day).push(event);}

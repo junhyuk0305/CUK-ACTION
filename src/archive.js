@@ -29,6 +29,11 @@ export function loadArchive() {
   return loading;
 }
 
+// Screen counts and the latest posted date, so the copy follows the published list.
+export function archiveSummary(rows) {
+  return { total: rows.length, excerpts: rows.filter(r => r.excerpt).length, latest: rows.reduce((max, r) => (r.date > max ? r.date : max), '') };
+}
+
 export function archiveAiInput(id) {
   return Object.hasOwn(excerpts, id) ? excerpts[id] : null;
 }

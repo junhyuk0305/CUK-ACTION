@@ -10,3 +10,16 @@
 .manager-workspace.is-editing>.page-heading,.manager-workspace.is-editing>.manager-account{display:none}.manager-editor-heading h1{font-size:24px}.manager-workspace.is-editing>.manager-workspace-tabs{margin-bottom:var(--sp-2)}
 .manager-workspace>[hidden]{display:none}.manager-editor-context{display:grid;gap:var(--sp-1);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3);border-left:3px solid var(--blue);background:var(--soft);font-size:12px;overflow-wrap:anywhere}.manager-editor-context span,.manager-editor-context small{color:var(--muted);font-size:11px}.manager-save-feedback{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2)}.manager-save-feedback .success-note{margin:0;padding:0;background:none;border:0;font-size:12px;flex:1}.manager-save-feedback .text-button{flex-shrink:0;font-size:12px}.manager-section-nav a[aria-disabled=true]{pointer-events:none;opacity:.5}
 @media(max-width:680px){.manager-save-feedback{align-items:flex-start;flex-wrap:wrap;gap:var(--sp-1)}.manager-save-feedback .success-note{flex-basis:100%;font-size:11px}.manager-save-feedback .text-button{font-size:11px}.manager-editor-context{padding:var(--sp-2)}}
+.manager-fieldset label:has(>:is(input,select,textarea)[required]){position:relative}.manager-fieldset label:has(>:is(input,select,textarea)[required])::before{content:'\D544\C218';content:'\D544\C218' / '';position:absolute;top:0;right:0;font-size:10px;font-weight:600;line-height:1.8;color:var(--blue)}.manager-fieldset label[data-error]::after{content:attr(data-error);color:var(--red);font-size:11px;font-weight:500}.manager-fieldset [aria-invalid=true]{border-color:var(--red)}.manager-field-hint{margin-top:calc(-1 * var(--sp-1))}.manager-publish-reason{flex-basis:100%;margin:0;text-align:right;font-size:11px;color:var(--muted)}.manager-repeat .icon-button{min-width:44px;min-height:44px}.manager-save-bar .button{min-height:44px}html:has(.manager-workspace.is-editing){scroll-padding-top:96px;scroll-padding-bottom:104px}
+@media(max-width:680px){html:has(.manager-workspace.is-editing){scroll-padding-top:184px;scroll-padding-bottom:180px}.manager-publish-reason{text-align:left}}
+.manager-workspace .warning .text-button{min-height:44px}
+
+/* W2 (S4): 좁은 폭에서 단계를 고르면 그 단계 내용이 두 고정 바 사이에 보이게 한다 */
+@media(max-width:680px){
+ html:has(.manager-workspace.is-editing){scroll-padding-top:152px}
+ .manager-section-nav{flex-wrap:nowrap}
+ .manager-section-nav a{flex:1 1 0;min-width:0;text-align:center}
+ .manager-save-bar .button,.manager-save-bar .button.primary{flex:1 1 auto}
+ .manager-section{scroll-margin-top:0}
+ .manager-publish-reason{order:-1}
+}

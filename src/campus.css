@@ -69,6 +69,7 @@ header{position:relative;z-index:4;border-bottom-width:1px}
 .jump{position:fixed;bottom:24px;right:max(24px,calc((100vw - 1160px)/2));z-index:2;background:var(--blue);color:white;border-radius:24px;min-height:44px;padding:0 20px;font-weight:600;box-shadow:0 4px 18px #14254b26}
 footer{border-top-width:1px;padding:18px 0;font-size:13px;color:var(--muted)}
 footer span{margin-left:8px}
+footer a{margin-left:8px;white-space:nowrap;text-decoration:underline}
 @media(hover:hover) and (pointer:fine){.row:hover{background:var(--bg)}.back:hover{background:var(--pale)}}
 @media(max-width:1100px){.intro{grid-template-columns:1fr 2fr}.filters{grid-column:1/-1}}
 @media(max-width:850px){
@@ -85,3 +86,21 @@ footer span{margin-left:8px}
   .jump{bottom:16px;right:16px}
 }
 @media(prefers-reduced-motion:reduce){.landing .sheet{margin-top:-16px}}
+/* 좁은 폭과 큰 글씨 (묶음 11) */
+@media(max-width:850px){
+  /* LC-06: 메뉴, 분류 칩, 부서 선택, 관심 버튼 누를 영역 44px */
+  .bar{height:auto;min-height:52px;flex-wrap:wrap;gap:4px}
+  .bar a:not(.brand){min-width:44px;min-height:44px;justify-content:center;white-space:nowrap}
+  .filters button,.department{min-height:44px}
+  .mark{width:44px}
+  /* LC-12: '공고 검색 ↑'을 관심 버튼이 없는 왼쪽에 둔다 */
+  .jump{left:16px;right:auto}
+}
+/* LC-16: 상세 버튼 글자를 한 줄로 둔다. 칸이 좁으면 안쪽 여백을 줄인다 */
+.actions .primary,.actions .secondary{white-space:nowrap}
+.cols>.panel{container-type:inline-size}
+@container (max-width:180px){.actions .primary,.actions .secondary{padding-inline:8px}.actions .primary svg,.actions .secondary svg{display:none}}
+/* W1 (S4): 맨 아래에서 '공고 검색 ↑'이 처리방침 링크를 덮지 않게 버튼 높이만큼 아래 여백을 둔다 */
+@media(max-width:850px){footer{padding-bottom:84px}}
+/* W4 (S4): 처리방침 링크 누를 영역 44px */
+footer a{padding-block:15px}

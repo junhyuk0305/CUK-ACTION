@@ -55,3 +55,18 @@
   #runway { padding-bottom: 20px; }
   #runway .stage { position: relative; top: 0; }
 }
+
+/* 좁은 폭과 큰 글씨 (묶음 11) */
+/* LC-05: '공고 보기'를 한 줄로 둔다. 두 칸이 좁으면 위아래로 놓는다 */
+#runway .stage { container-type: inline-size; }
+.stage .feature-link { white-space: nowrap; }
+@container (max-width: 290px) {
+  .stage-grid { grid-template-columns: 1fr; }
+  .stage figure { aspect-ratio: 2/1; }
+}
+@media (max-width:850px) {
+  /* LC-06: 추천 이동, 재생, 전체 공고 링크 누를 영역 44px */
+  .stage-controls button { width: 44px; height: 44px; }
+  .stage-controls .autoplay { min-height: 44px; }
+  .stage-controls a { display: inline-flex; align-items: center; min-height: 44px; padding: 0; }
+}

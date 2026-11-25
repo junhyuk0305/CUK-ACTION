@@ -23,10 +23,26 @@ function failure(error, action) {
   if (error) throw new Error(`${action}에 실패했습니다. 연결과 로그인 상태를 확인해 주세요.`, { cause: error });
 }
 // ID login: the ID is stored in Supabase Auth as an internal email that is never shown or mailed.
-export async function signUpWithId(id, password) {
-  const { data, error } = await client().auth.signUp({ email: loginEmail(id), password });
+// A retried signup whose first response was lost finds its own account; logging in with the same password continues as that account.
+export async function signUpWithId(id, password, auth = client().auth) {
+  const { data, error } = await auth.signUp({ email: loginEmail(id), password });
+  if (error?.code === 'user_already_exists') {
+    const { error: signInError } = await auth.signInWithPassword({ email: loginEmail(id), password });
+    if (!signInError) return;
+    // A failed follow-up login says nothing about who owns the ID; report the outage or rate limit itself.
+    if (['network', 'rate', 'server'].includes(authErrorKind(signInError))) throw signInError;
+  }
   if (error) throw error;
   if (!data.session) throw new Error('가입 직후 로그인되지 않았습니다. 운영자에게 알려 주세요.');
+}
+// Network, rate limit and server failures must not be reported as a wrong ID or password.
+export function authErrorKind(error) {
+  // auth-js also throws 5xx responses as AuthRetryableFetchError, so the status decides before the name.
+  if (error?.status >= 500) return 'server';
+  if (error?.status === 429 || error?.code === 'over_request_rate_limit') return 'rate';
+  if ((error?.name === 'AuthRetryableFetchError' && !error.status) || error instanceof TypeError) return 'network';
+  if (error?.code === 'invalid_credentials' || error?.status === 400) return 'credentials';
+  return 'other';
 }
 export async function signInWithId(id, password) {
   const { error } = await client().auth.signInWithPassword({ email: loginEmail(id), password });
@@ -66,28 +82,39 @@ export async function isManager(userId) {
   failure(error, '담당자 권한 확인');
   return Boolean(data);
 }
+// PostgREST returns at most 1000 rows per request, so notice lists are read in pages with a stable order.
+async function readNoticePages(query, action) {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await query().order('updated_at', { ascending: false }).order('id').range(from, from + 999);
+    failure(error, action);
+    rows.push(...data.map(flatten));
+    if (data.length < 1000) return rows;
+  }
+}
 export async function listPublishedNotices() {
-  const { data, error } = await client().from('notices').select('*').eq('status', 'published').order('updated_at', { ascending: false });
-  failure(error, '공고 조회');
-  return data.map(flatten);
+  return readNoticePages(() => client().from('notices').select('*').eq('status', 'published'), '공고 조회');
 }
 export async function listManagedNotices() {
   const { data: { user }, error: authError } = await client().auth.getUser();
   failure(authError, '로그인 확인');
   if (!user || !await isManager(user.id)) throw new Error('담당자 권한이 필요합니다.');
-  const { data, error } = await client().from('notices').select('*').eq('owner_id', user.id).order('updated_at', { ascending: false });
-  failure(error, '담당 공고 조회');
-  return data.map(flatten);
+  return readNoticePages(() => client().from('notices').select('*').eq('owner_id', user.id), '담당 공고 조회');
 }
 export async function saveNotice(notice) {
-  const { id, status = 'draft', owner_id, updated_at, isDemo, ...data } = notice;
+  const { id, insertId, status = 'draft', owner_id, updated_at, isDemo, ...data } = notice;
+  // A new notice carries an id chosen when the editor opened, so a retry after a lost response updates that row.
+  // An existing notice saves only over the version it was opened from; 0 rows means another tab saved first.
   const query = id
-    ? client().from('notices').update({ status, data }).eq('id', id)
-    : client().from('notices').insert({ status, data });
-  const { data: row, error } = await query.select('*').single();
-  if (error?.message?.startsWith('게시하려면')) throw new Error(error.message);
+    ? client().from('notices').update({ status, data }).eq('id', id).eq('updated_at', updated_at)
+    : client().from('notices').upsert({ ...(insertId ? { id: insertId } : {}), status, data });
+  const { data: rows, error } = await query.select('*');
+  // validate_notice rejects content with P0001 and a reason written for the manager; show that reason as is.
+  if (error?.code === 'P0001') throw new Error(error.message, { cause: error });
+  if (error?.code === '23514') throw new Error('공고 내용의 형식이나 크기를 확인해 주세요.', { cause: error });
   failure(error, '공고 저장');
-  return flatten(row);
+  if (!rows.length) throw conflictError();
+  return flatten(rows[0]);
 }
 export async function getNoticeMetrics(id, fromDate, toDate) {
   const { data, error } = await client().rpc('notice_metrics', { p_notice_id: id, p_from: fromDate, p_to: toDate });

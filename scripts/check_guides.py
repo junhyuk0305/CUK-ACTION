@@ -21,7 +21,7 @@ with sync_playwright() as p:
     guide.get_by_role('button',name='건너뛰기').click()
     expect(guide).to_contain_text('대상은 재학생 전체입니다.')
     page.get_by_role('button',name='관심 공고에 저장',exact=True).click()
-    page.get_by_role('button',name='공고 목록으로').click()
+    page.get_by_role('button',name='홈으로').click()
     expect(search).to_have_value('동계 직무 부트캠프')
     page.get_by_role('link',name='관심 공고',exact=True).click()
     page.locator('#open-277842').click()
