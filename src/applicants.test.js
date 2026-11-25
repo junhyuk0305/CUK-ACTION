@@ -40,7 +40,7 @@ test('applicant row shows the snapshot, m/n and a fail mark', () => {
 test('applicant row reads empty snapshot and eligibility', () => {
   const row = applicantRow({id: 'a', status: 'submitted', profile_snapshot: {}, eligibility: {}});
   assert.equal(row.name, '미입력');
-  assert.equal(row.eligibility, '0/0');
+  assert.equal(row.eligibility, '지원 조건 없음');
   assert.equal(row.failed, false);
 });
 

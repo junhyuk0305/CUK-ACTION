@@ -64,7 +64,6 @@ export default function Featured({rows, onOpen, initialId}) {
         <button aria-label="이전 추천 공고" onClick={() => step(-1)}><ChevronLeft size={17}/></button>
         <span aria-live={rotating ? 'off' : 'polite'}>{slide.index+1} / {features.length}</span>
         <button aria-label="다음 추천 공고" onClick={() => step(1)}><ChevronRight size={17}/></button>
-        <button className="autoplay" onClick={() => setPaused(value => !value)}>{paused?'재생':'일시정지'}</button>
         <a className="text-button" href="#browse">전체 공고 ↓</a>
       </div>
     </div>

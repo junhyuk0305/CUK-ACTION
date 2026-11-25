@@ -43,10 +43,10 @@ export function SiteRecordStatus({ records }) {
 }
 
 export function SiteApplicationRow({ entry, onOpen }) {
-  return <article className="panel application-row site-application-row">
-    <div><span className="tag">{{ submitted: '제출 완료', withdrawn: '신청 취소', draft: '작성 중' }[entry.status]}</span>
+  return <article className="application-row site-application-row">
+    <div><span className={'tag ' + (entry.status === 'submitted' ? 'green' : 'gray')}>{{ submitted: '제출 완료', withdrawn: '신청 취소', draft: '작성 중' }[entry.status]}</span>
       <h2>{entry.notice?.title ?? '게시가 종료된 공고'}</h2>
-      {entry.notice?.deadline && <p>{entry.notice.deadline} 마감</p>}</div>
+      {entry.notice?.deadline && <p className="meta-line"><span>{entry.notice.deadline} 마감</span><span>사이트 신청</span></p>}</div>
     {entry.notice && <button className="button secondary" data-open={entry.notice.id} onClick={() => onOpen(entry.notice)}>
       신청서 보기</button>}
   </article>;

@@ -33,9 +33,11 @@ function largestDrop(rows) {
 const shortLabel = text => {const value = String(text || ''); return value.length > 40 ? value.slice(0, 40).trimEnd() + '…' : value;};
 
 // Deleted blocks show the largest single-block count, because students are not unique across blocks.
-export function blockRows(notice, counts = {}) {
+// With a view count the rows start with the title: every student who opened the detail reached it, 0 included.
+export function blockRows(notice, counts = {}, view) {
   const blocks = noticeBlocks(notice);
   const rows = blocks.map(block => ({id: block.id, label: shortLabel(block.type === 'image' ? block.alt || '이미지' : block.text), count: countOf(counts, block.id)}));
+  if (view !== undefined) rows.unshift({id: 'title', label: '제목 (상세를 연 학생)', count: view, title: true});
   const current = new Set(blocks.map(block => block.id));
   const deletedCounts = Object.entries(counts).filter(([id]) => !current.has(id)).map(([, count]) => count);
   const visible = deletedCounts.filter(known);

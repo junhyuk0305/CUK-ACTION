@@ -47,6 +47,15 @@ test('blocks missing from the aggregate count 0 and ids only in the aggregate ar
   assert.deepEqual(blockRows(site, {'old-1': null}).deleted, {blocks: 1, count: null});
 });
 
+test('block rows start with the title row: students who opened the detail, 0 included', () => {
+  const {rows, dropIndex} = blockRows(site, {'b-1': 12, 'b-2': 10}, 40);
+  assert.deepEqual(rows.map(row => [row.id, row.count]), [['title', 40], ['b-1', 12], ['b-2', 10], ['b-3', 0], ['b-4', 0]]);
+  assert.equal(rows[0].label, '제목 (상세를 연 학생)');
+  assert.equal(dropIndex, 1);
+  assert.deepEqual(blockRows(site, {}, 0).rows.map(row => row.count), [0, 0, 0, 0, 0]);
+  assert.equal(blockRows(site, {}, null).rows[0].count, null);
+});
+
 test('blocks fall back to noticeBlocks for notices without blocks', () => {
   const {rows} = blockRows({excerpt: '첫 줄\n둘째 줄'}, {x1: 5});
   assert.deepEqual(rows.map(row => [row.id, row.label, row.count]), [['x1', '첫 줄', 5], ['x2', '둘째 줄', 0]]);

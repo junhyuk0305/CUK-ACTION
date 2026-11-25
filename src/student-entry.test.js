@@ -41,7 +41,7 @@ test('PS-09: account browse states how many closed notices the open-only filter 
 
 test('QE-20: a public deep link to a source-only notice shows the notice with its school link', () => {
   assert.match(campus, /row=rows\.find\(r=>r\.id===detailId\), item=row\?\.use==='본문 발췌'\?row:null/);
-  assert.match(campus, /\{row\?<><div className="detail-heading">.*?<span className="tag">\{row\.category\}<\/span>.*?<h1 ref=\{title\} tabIndex="-1">\{row\.title\}<\/h1>.*?<a className="button primary" href=\{row\.url\}/s);
+  assert.match(campus, /\{row\?<><div className="detail-heading">.*?<div className="meta-line">.*?<span>\{row\.category\}<\/span>.*?<h1 ref=\{title\} tabIndex="-1">\{row\.title\}<\/h1>.*?<a className="button primary" href=\{row\.url\}/s);
 });
 
 test('the sidebar logo goes to the public home page', () => {

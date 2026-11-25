@@ -31,7 +31,7 @@ function ImageBlock({block, name, noticeId, testMode, onChange}) {
   }
   return <div className="manager-fields">
     {block.src && <img className="manager-wide manager-image-preview" src={block.src} alt={block.alt}/>}
-    {testMode ? <p className="info-note manager-wide">테스트 공간에서는 이미지를 올릴 수 없습니다. 담당자 계정으로 로그인하세요.</p>
+    {testMode ? <p className="help-text manager-wide">테스트 공간에서는 이미지를 올릴 수 없습니다. 담당자 계정으로 로그인하세요.</p>
       : <label className="manager-wide">{name} 파일<input type="file" accept="image/png,image/jpeg,image/webp" disabled={busy} onChange={choose} required={!block.src}/><small>png, jpg, webp 파일을 5MB까지 올립니다.{block.src ? ' 다른 파일을 고르면 이미지를 바꿉니다.' : ''}</small></label>}
     {busy && <p className="loading-inline manager-wide" role="status">이미지를 올리는 중입니다.</p>}
     {error && <div className="warning manager-wide" role="alert">{error}</div>}
@@ -56,7 +56,7 @@ export function BlockEditor({blocks, noticeId, testMode, suggestions = [], onApp
         {suggestion && <div className="info-note"><div><p><b>AI 수정 제안</b></p><p>이유: {suggestion.reason}</p><p>고친 문장: {suggestion.suggestion}</p><p>{AI_NOTE}</p><button type="button" className="text-button" onClick={() => onApply(suggestion)}>적용</button></div></div>}
       </div>;
     })}
-    {full && <p className="muted">본문 블록은 {BLOCK_LIMIT}개까지 넣을 수 있습니다.</p>}
+    {full && <p className="help-text">본문 블록은 {BLOCK_LIMIT}개까지 넣을 수 있습니다.</p>}
   </div>;
 }
 
@@ -95,8 +95,8 @@ export function PreviewDialog({notice, onClose}) {
     return () => {document.removeEventListener('keydown', onKey); previous?.focus?.();};
   }, []);
   return <div className="modal-backdrop" onClick={onClose}><section className="modal manager-preview" role="dialog" aria-modal="true" aria-labelledby="manager-preview-title" onClick={event => event.stopPropagation()}>
-    <div className="section-heading"><div><div className="eyebrow">미리보기</div><h2 id="manager-preview-title">{notice.title || '제목 없는 공고'}</h2></div><button ref={closeRef} type="button" className="icon-button" aria-label="미리보기 닫기" onClick={onClose}><X size={22}/></button></div>
-    <p className="muted">학생 화면과 같은 부품으로 보여 줍니다. 입력한 답은 저장하지 않습니다.</p>
+    <div className="section-heading"><h2 id="manager-preview-title">{notice.title || '제목 없는 공고'}</h2><button ref={closeRef} type="button" className="icon-button" aria-label="미리보기 닫기" onClick={onClose}><X size={22}/></button></div>
+    <p className="help-text">미리보기입니다. 학생 화면과 같은 부품으로 보여 줍니다. 입력한 답은 저장하지 않습니다.</p>
     <NoticeBlocks notice={notice}/>
     <h3>신청서</h3>
     {notice.questions.length ? <ApplicationForm notice={notice} profile={{}} verifiedIds={[]} value={value} onChange={setValue} preview/> : <p className="manager-empty">작성 문항이 없습니다.</p>}

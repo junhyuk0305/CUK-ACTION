@@ -1,6 +1,6 @@
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, Compass, GraduationCap, Home, Menu, Search, X} from 'lucide-react';
+import {ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, GraduationCap, Search, X} from 'lucide-react';
 import './style.css';
 import './student.css';
 import Featured from './Featured.jsx';
@@ -61,7 +61,7 @@ function App() {
   const [hash,setHash]=useState(location.hash), [saved,setSaved]=useState([]), [storageError,setStorageError]=useState('');
   const [guest,setGuest]=useState(()=>{try{return JSON.parse(localStorage.getItem('cuk-campus-guide')||'{}')}catch{return {}}});
   function updateGuest(key,value){try{const next={...JSON.parse(localStorage.getItem('cuk-campus-guide')||'{}'),[key]:value};localStorage.setItem('cuk-campus-guide',JSON.stringify(next));setGuest(next);}catch{setStorageError('이 기기의 안내 확인 상태를 저장하지 못했습니다.');}}
-  const [drafts,setDrafts]=useState(''), [jump,setJump]=useState(false), [userId,setUserId]=useState(null), [menu,setMenu]=useState(false);
+  const [drafts,setDrafts]=useState(''), [jump,setJump]=useState(false), [userId,setUserId]=useState(null);
   useEffect(()=>{const listener=supabase?.auth.onAuthStateChange((_event,session)=>setUserId(session?.user?.id??null));return()=>listener?.data.subscription.unsubscribe();},[]);
   const returnTo=useRef(null), title=useRef(null), searchBar=useRef(null), searchBox=useRef(null);
   const savedOnly=hash==='#saved', detailId=hash.startsWith('#notice/')?hash.slice(8):null;
@@ -81,7 +81,7 @@ function App() {
         const url=new URL(location.href);
         if(url.searchParams.has('src')){url.searchParams.delete('src');history.replaceState(history.state,'',url);}
       }
-      setHash(location.hash);setFilters(readFilters());setMenu(false);
+      setHash(location.hash);setFilters(readFilters());
     };
     const restoration=history.scrollRestoration;
     history.scrollRestoration='manual';
@@ -118,7 +118,6 @@ function App() {
   }
   function tab(e,target){
     if(e.metaKey || e.ctrlKey || e.altKey || e.shiftKey)return;
-    setMenu(false);
     e.preventDefault();
     const url=new URL(location.href);url.hash=target;url.searchParams.delete('src');
     for(const key of Object.keys(noFilters))url.searchParams.delete(key);
@@ -145,21 +144,18 @@ function App() {
   const place=detailId?(returnTo.current?returnTo.current.hash:'#browse'):hash;
   const isPlace=target=>target==='home'?!place||place==='#home':place==='#'+target;
   const latest=archiveSummary(rows).latest;
-  return <div className="app-shell campus">
-  <aside className={'sidebar '+(menu?'open':'')}><a className="brand" href="#home" onClick={e=>tab(e,'home')}><span className="brand-symbol"><GraduationCap size={23}/></span><span>CUK <b>ACTION</b><small>가톨릭대학교 캠퍼스 라이프</small></span></a>
-    <div className="workspace-label">CAMPUS NOTICES</div>
-    <nav aria-label="주 메뉴">{[['home',Home,'홈'],['browse',Compass,'전체 공고'],['saved',Bookmark,'관심 공고']].map(([target,Icon,label])=><a key={target} href={'#'+target} className={isPlace(target)?'active':undefined} aria-current={!detailId&&isPlace(target)?'page':undefined} onClick={e=>tab(e,target)}><Icon size={20}/>{label}</a>)}</nav>
-    <div className="sidebar-bottom"><a className="button primary account-link" href="/account.html">{userId?'대시보드':'로그인'}</a></div>
-  </aside>
-  {menu&&<button className="menu-backdrop" aria-label="메뉴 닫기" onClick={()=>setMenu(false)}/>}<div className="main-shell"><header className="topbar"><button className="icon-button mobile-menu" aria-label="메뉴" aria-expanded={menu} onClick={()=>setMenu(!menu)}><Menu size={22}/></button></header>
+  return <div className="campus">
+  <header className="campus-top"><div className="campus-bar"><a className="brand" href="#home" onClick={e=>tab(e,'home')}><span className="brand-symbol"><GraduationCap size={23}/></span><span>CUK <b>ACTION</b><small>가톨릭대학교 캠퍼스 라이프</small></span></a>
+    <nav aria-label="주 메뉴">{[['home','홈'],['browse','전체 공고'],['saved','관심 공고']].map(([target,label])=><a key={target} href={'#'+target} className={isPlace(target)?'active':undefined} aria-current={!detailId&&isPlace(target)?'page':undefined} onClick={e=>tab(e,target)}>{label}</a>)}</nav>
+    <a className="button primary account-link" href="/account.html">{userId?'대시보드':'로그인'}</a></div></header>
   <main>
     {storageError&&<p className="warning" role="alert">{storageError}</p>}
     {error?<div className="empty" role="alert"><h2>공고를 불러오지 못했습니다.</h2><button className="button secondary" onClick={()=>{setError(false);setAttempt(attempt+1)}}>다시 시도</button></div>:!data?<p className="loading-state" role="status">공고를 불러오는 중입니다.</p>:detailId?<article className="detail">
       <button className="back" onClick={()=>{if(returnTo.current)history.back();else location.hash='browse'}}><ArrowLeft size={16}/>{publicBackLabel(returnTo.current)}</button>
-      {row?<><div className="detail-heading"><div><div className="row"><span className="tag">{row.category}</span><span className="tag">{modeLabel(row)}</span><span className="muted">{row.department}{row.date&&' / 게시일 '+row.date}</span></div><h1 ref={title} tabIndex="-1">{row.title}</h1><p>{item?'관심 공고는 이 기기에 저장됩니다.':'이 공고의 내용은 학교 원문에서 확인하세요.'}</p></div>
+      {row?<><div className="detail-heading"><div><div className="meta-line"><span>{row.department}</span><span>{row.category}</span><span>{modeLabel(row)}</span>{row.date&&<span>게시일 {row.date}</span>}</div><h1 ref={title} tabIndex="-1">{row.title}</h1><p>{item?'관심 공고는 이 기기에 저장됩니다.':'이 공고의 내용은 학교 원문에서 확인하세요.'}</p></div>
       <div className="row actions">{row.url&&<a className="button primary" href={row.url} target="_blank" rel="noreferrer">{row.staffAuthored?'공고 원문 보기':'학교 원문 보기'} <ArrowUpRight size={16}/></a>}<button className="button secondary" aria-pressed={saved.includes(row.id)} onClick={()=>toggle(row.id)}><Bookmark size={16} fill={saved.includes(row.id)?'currentColor':'none'}/>{saved.includes(row.id)?'관심 공고에서 삭제':'관심 공고에 저장'}</button><a className="button secondary" onClick={publicEvents.transfer} href={'/account.html?src='+resolveSource(location.search,!!returnTo.current)+'#start/'+(row.noticeId||row.id)}>{applyMode(row)==='site'?'신청하기':'준비 시작'} <ArrowRight size={16}/></a></div></div>
       {item&&<div className="detail-body">{item.excerpt&&!item.staffAuthored&&<div className="panel guide-panel"><GuideDetail key={item.id} item={item} publicOnly status={guest.status} onStatus={v=>updateGuest('status',v)} seen={guest[item.id]} onSeen={v=>updateGuest(item.id,v)}/></div>}<section className="panel excerpt"><h2>공고 본문</h2><NoticeBlocks notice={item} onReach={publicEvents.onReach}/></section></div>}</>:<h1 ref={title} tabIndex="-1">공고를 찾을 수 없습니다.</h1>}</article>:<>
-      <div className="page-heading"><div><div className="eyebrow">{savedOnly?'MY INTERESTS':'CAMPUS NOTICES'}</div><h1>{savedOnly?'관심 공고':'공고 찾기'}</h1><p>{savedOnly?'관심 공고는 이 기기에 저장됩니다.':'가톨릭대학교 교내 공고를 검색하고 학교 원문을 확인하세요.'}</p></div>{savedOnly&&drafts&&<button className="button secondary" onClick={()=>downloadDrafts(drafts)}>이전에 작성한 지원서 내려받기</button>}</div>
+      <div className="page-heading"><div><h1>{savedOnly?'관심 공고':'공고 찾기'}</h1><p>{savedOnly?'관심 공고는 이 기기에 저장됩니다.':'가톨릭대학교 교내 공고를 검색하고 학교 원문을 확인하세요.'}</p></div>{savedOnly&&drafts&&<button className="button secondary" onClick={()=>downloadDrafts(drafts)}>이전에 작성한 지원서 내려받기</button>}</div>
       {home&&<Featured rows={rows} onOpen={remember} initialId={returnTo.current?.featureId}/>}
       <div className="filters" ref={searchBar}><div className="tabs categories">{['',...new Set(rows.map(r=>r.category))].map(c=><button key={c} className={category===c?'active':undefined} aria-pressed={category===c} onClick={()=>changeFilters({...filters,category:c})}>{c||'전체'}</button>)}</div>
       <label className="search"><Search size={17}/><input ref={searchBox} type="search" aria-label="공고 검색" placeholder="공고 제목, 부서, 내용 검색" value={query} onChange={e=>changeFilters({...filters,q:e.target.value})}/></label></div>
@@ -168,7 +164,7 @@ function App() {
       {matches.length?<div className="panel notice-table"><div className="thead" aria-hidden="true">{['공고 제목','게시 부서','분류','게시일','보기'].map(h=><b key={h}>{h}</b>)}</div>
       <div className="rows">{matches.slice(0,limit).map(r=><article key={r.id} className="notice-row">
       <div className="row-link">
-        <h3 id={'row-'+r.id}><NoticeLink row={r} onOpen={remember}>{r.title}</NoticeLink> <small className="tag">{modeLabel(r)}</small></h3>
+        <h3 id={'row-'+r.id}><NoticeLink row={r} onOpen={remember}>{r.title}</NoticeLink>{applyMode(r)==='site'&&<small className="row-mode">{modeLabel(r)}</small>}</h3>
         <span>{r.department}</span><span className="category">{r.category}</span><span>{r.date}</span>
         {!r.staffAuthored&&r.url?<a className="destination" href={r.url} target="_blank" rel="noreferrer">학교 원문 보기 <ArrowUpRight size={14}/></a>
           :<a className="destination" id={'detail-'+r.id} href={'#notice/'+r.id} onClick={remember}>공고 보기 <ArrowRight size={14}/></a>}
@@ -178,6 +174,6 @@ function App() {
       {matches.length>limit&&<button className="button secondary load-more" onClick={()=>setLimit(limit+20)}>공고 더 보기 <span>{Math.min(limit,matches.length)} / {matches.length}</span></button>}
       {jump&&<button className="jump" onClick={()=>{searchBox.current?.focus({preventScroll:true});searchBar.current?.scrollIntoView()}}>공고 검색 ↑</button>}</>}
     <footer className="campus-footer">CUK Action <span>가톨릭대학교 교내 공고</span> <a href="/privacy.html">개인정보 처리방침</a></footer>
-  </main></div></div>;
+  </main></div>;
 }
 createRoot(document.getElementById('root')).render(<App/>);

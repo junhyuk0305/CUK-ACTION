@@ -3,7 +3,8 @@ from pathlib import Path
 import os
 from playwright.sync_api import sync_playwright, expect
 
-BASE = os.environ.get('CUK_TEST_URL', 'http://127.0.0.1:5173')
+from browser_helpers import BASE
+BASE = os.environ.get('CUK_TEST_URL', BASE)
 SHOTS = Path('tmp/browser-checks')
 SHOTS.mkdir(parents=True, exist_ok=True)
 

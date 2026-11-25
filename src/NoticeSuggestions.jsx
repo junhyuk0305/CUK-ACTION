@@ -26,10 +26,10 @@ export default function NoticeSuggestions({notice, fromDate, toDate, onEdit}) {
       <div className="info-note">{AI_NOTE}</div>
       {suggestions.map(row => <div className="manager-repeat" key={row.blockId}>
         <b>{String(blocks.get(row.blockId).text || '').slice(0, 40)}</b>
-        <p className="muted">이유: {row.reason}</p>
+        <p className="help-text">이유: {row.reason}</p>
         <p>고친 문장: {row.suggestion}</p>
       </div>)}
       <button type="button" className="button primary" onClick={() => onEdit(suggestions)}>공고 수정에서 반영</button>
-    </> : <p className="muted">{result.message || 'AI가 고칠 블록을 찾지 못했습니다.'}</p>)}
+    </> : <p className="help-text">{result.message || 'AI가 고칠 블록을 찾지 못했습니다.'}</p>)}
   </>;
 }

@@ -2,5 +2,5 @@
 .guide-facts>div{border-left:3px solid #cad9ef;padding-left:12px}
 .guide-facts p{margin:3px 0}
 .guide-facts summary,.guide-facts a{cursor:pointer;color:#164b8c;text-decoration:underline}
-.guide-facts details,.guide-facts small{font-size:.88rem}
+.guide-facts details,.guide-facts small{font-size:var(--fs-body)}
 .guide-facts button{padding:6px 12px;margin:4px;border:1px solid #bcc8db;border-radius:6px}

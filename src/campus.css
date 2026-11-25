@@ -1,24 +1,32 @@
 /* 공개 홈페이지: 대시보드(style.css, student.css) 부품을 쓰고, 공개 화면에만 있는 것만 둔다 */
-.campus .sidebar-bottom .account-link{width:100%}
+/* 위쪽 메뉴 막대: 공개 화면은 사이드바 대신 이 막대로 홈·전체 공고·관심 공고를 오간다 */
+.campus-top{background:var(--white);border-bottom:1px solid var(--line)}
+.campus-bar{max-width:1440px;margin:auto;padding:var(--sp-2) var(--sp-5);display:flex;align-items:center;gap:var(--sp-4)}
+.campus-bar .brand{margin-right:auto}
+.campus-bar nav{display:flex;flex-direction:row;gap:var(--sp-1)}
+.campus-bar nav a{display:flex;align-items:center;min-height:42px;padding:0 var(--sp-2);border-radius:8px;font-size:var(--fs-body);font-weight:600;color:var(--muted)}
+.campus-bar nav a.active{background:var(--soft);color:var(--blue)}
 
 /* 공고 찾기 */
 .campus .filters{scroll-margin-top:var(--sp-2)}
 .campus .search input{width:220px}
-.campus .discovery-controls h2{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:0}
-.campus .discovery-controls h2 b{color:var(--blue)}
-.campus .discovery-controls select{min-height:42px;max-width:180px;font-size:12px}
+.campus .discovery-controls h2{font-size:var(--fs-body);font-weight:600;color:var(--ink);letter-spacing:0}
+.campus .discovery-controls h2 b{color:var(--ink)}
+.campus .discovery-controls select{min-height:42px;max-width:180px;font-size:var(--fs-small)}
 
 /* 공고 목록 표: 담당자 공고별 비교 표(overview.css)와 같은 모양 */
 .notice-table{--columns:minmax(0,4.5fr) minmax(0,1.6fr) minmax(0,.7fr) minmax(0,1fr) minmax(0,1.1fr);padding:0;overflow:hidden}
 .thead,.row-link{display:grid;grid-template-columns:var(--columns);gap:var(--sp-2);align-items:center}
 /* 머리 마지막 칸은 행의 관심 버튼(44px) 자리 */
-.thead{grid-template-columns:var(--columns) 44px;padding:var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);background:var(--bg);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.thead{grid-template-columns:var(--columns) 44px;padding:var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);background:var(--bg);border-bottom:1px solid var(--line);font-size:var(--fs-small);color:var(--muted)}
 .thead b{font-weight:500}
 .notice-row{display:flex;align-items:center;gap:var(--sp-2);padding-right:var(--sp-1);border-bottom:1px solid var(--line)}
 .notice-row:last-child{border-bottom:0}
 .notice-row:has(:focus-visible){background:var(--bg)}
-.row-link{flex:1;min-width:0;padding:var(--sp-2) 0 var(--sp-2) var(--sp-3);font-size:12px;color:var(--muted)}
-.notice-row h3{font-size:14px;font-weight:500;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.row-link{flex:1;min-width:0;padding:var(--sp-2) 0 var(--sp-2) var(--sp-3);font-size:var(--fs-small);color:var(--muted)}
+.notice-row h3{font-size:var(--fs-h3);font-weight:600;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.notice-row h3 a:hover{text-decoration:underline}
+.row-mode{display:block;margin-top:2px;color:var(--muted);font-size:var(--fs-small);font-weight:400}
 .row-link>span:nth-of-type(3){font-variant-numeric:tabular-nums}
 .destination{display:flex;align-items:center;gap:var(--sp-1);color:var(--blue);font-weight:500}
 .mark{width:44px;height:44px;flex:none;display:grid;place-items:center;color:var(--muted);border-radius:8px}
@@ -36,19 +44,18 @@
 .guide-panel:empty{display:none}
 .guide-panel .guide-facts{margin:0}
 .excerpt{grid-column:1;grid-row:1}
-.excerpt h2{font-size:16px;margin-bottom:var(--sp-2)}
-.excerpt div{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-size:14px;line-height:1.9}
+.excerpt h2{font-size:var(--fs-h2);margin-bottom:var(--sp-2)}
+.excerpt div{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-size:var(--fs-body);line-height:1.9}
 
 .jump{position:fixed;bottom:var(--sp-3);right:var(--sp-4);z-index:2;background:var(--blue);color:var(--white);border-radius:var(--radius);min-height:44px;padding:0 var(--sp-3);font-weight:600;box-shadow:var(--shadow)}
-.campus-footer{margin-top:var(--sp-5);padding-top:var(--sp-2);border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.campus-footer{margin-top:var(--sp-5);padding-top:var(--sp-2);border-top:1px solid var(--line);font-size:var(--fs-small);color:var(--muted)}
 .campus-footer span{margin-left:var(--sp-1)}
 .campus-footer a{display:inline-block;margin-left:var(--sp-1);padding-block:var(--sp-1);white-space:nowrap;text-decoration:underline}
 
-@media(hover:hover) and (pointer:fine){.notice-row:hover{background:var(--bg)}}
+@media(hover:hover) and (pointer:fine){.notice-row:hover,.campus-bar nav a:not(.active):hover{background:var(--bg)}}
 @media(max-width:1100px){.detail-body{grid-template-columns:minmax(0,1fr)}.guide-panel,.excerpt{grid-column:auto;grid-row:auto}}
 @media(max-width:900px){.thead>:nth-child(3),.row-link .category{display:none}.notice-table{--columns:minmax(0,4.5fr) minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.1fr)}}
 @media(max-width:680px){
-  .campus .filters{scroll-margin-top:calc(64px + var(--sp-2))}
   .campus .discovery-controls>.row{flex-wrap:wrap}
   /* 휴대폰: 표 머리를 숨기고 행을 카드처럼 쌓는다 */
   .thead{display:none}
@@ -60,5 +67,12 @@
   /* 맨 아래에서 '공고 검색 ↑'이 처리방침 링크를 덮지 않게 버튼 높이만큼 아래 여백을 둔다 */
   .campus-footer{padding-bottom:var(--sp-6)}
   /* '공고 검색 ↑'은 관심 버튼이 없는 왼쪽에 56px 원으로 둔다. 글자는 두 줄 */
-  .jump{left:var(--sp-2);right:auto;bottom:var(--sp-2);width:56px;height:56px;min-height:0;padding:0;border-radius:50%;font-size:12px;line-height:1.3;word-break:keep-all}
+  .jump{left:var(--sp-2);right:auto;bottom:var(--sp-2);width:56px;height:56px;min-height:0;padding:0;border-radius:50%;font-size:var(--fs-small);line-height:1.3;word-break:keep-all}
+}
+@media(max-width:1200px){.campus-bar{padding-inline:var(--sp-4)}}
+@media(max-width:680px){
+  .campus-bar{flex-wrap:wrap;gap:var(--sp-1);padding:var(--sp-1) var(--sp-2)}
+  .campus-bar .brand small{display:none}
+  .campus-bar nav{order:3;width:100%}
+  .campus-bar nav a{flex:1;justify-content:center;padding:0 var(--sp-1)}
 }

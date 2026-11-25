@@ -20,7 +20,7 @@ export function applicantRow(application) {
   const p = application.profile_snapshot || {}, e = application.eligibility || {};
   return {
     id: application.id, name: text(p.name), studentNo: text(p.studentNo), department: text(p.department), year: text(p.year),
-    eligibility: `${e.pass ?? 0}/${e.total ?? 0}`, failed: (e.fail ?? 0) > 0,
+    eligibility: e.total ? `${e.pass ?? 0}/${e.total}` : '지원 조건 없음', failed: (e.fail ?? 0) > 0,
     submitted: submittedText(application.submitted_at), status: APPLICATION_STATUS[application.status] || application.status,
     withdrawn: application.status === 'withdrawn',
   };

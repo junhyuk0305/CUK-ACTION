@@ -4,7 +4,7 @@ import json
 import re
 from playwright.sync_api import sync_playwright, expect
 
-BASE = 'http://127.0.0.1:5173'
+from browser_helpers import BASE, finish_onboarding
 OUT = Path('tmp/browser-checks')
 OUT.mkdir(parents=True, exist_ok=True)
 BIO = '[흐름 테스트] 바이오헬스 아카데미'
@@ -15,6 +15,7 @@ CONFLICT = '[흐름 테스트] 일정 확인 필요 사례'
 
 def enter(page, name):
     page.get_by_role('button', name=name + '로 체험', exact=True).click()
+    if name.startswith('학생'): finish_onboarding(page)
     expect(page.get_by_role('button', name='테스트 종료', exact=True)).to_be_visible()
 
 
@@ -70,6 +71,8 @@ with sync_playwright() as p:
         page.get_by_role('button', name='초안 불러오기', exact=True).click()
         expect(page.get_by_label('공고 제목', exact=True)).to_have_value(title)
         expect(page.locator('.manager-editor-heading .tag')).to_have_text('임시저장')
+        # Imported drafts come from school notices, so they open as external-link notices.
+        expect(page.get_by_role('radio', name='외부 링크 신청', exact=True)).to_be_checked()
         if title == BIO:
             expect(page.get_by_label('항목 1 이름', exact=True)).to_have_value('1기 제약바이오·의료기기')
             page.get_by_role('button', name='문항 추가', exact=True).click()
@@ -85,11 +88,12 @@ with sync_playwright() as p:
     leave(page)
 
     enter(page, '학생 A')
-    page.get_by_role('button', name='프로필 설정', exact=True).click()
+    menu(page, '내 정보')
     page.get_by_label('가상 학생 유형', exact=True).select_option(label='학점 경계값 3.0')
     expect(page.get_by_label('평균 학점', exact=False)).to_have_value('3.0')
-    page.get_by_role('button', name='프로필 저장', exact=True).click()
+    page.get_by_role('button', name='내 정보 저장', exact=True).click()
     saved(page)
+    menu(page, '홈')
     page.get_by_role('button', name=BIO, exact=True).click()
     expect(page.locator('.option-picker button')).to_have_count(2)
     page.get_by_role('button', name='지원 준비 시작', exact=True).click()

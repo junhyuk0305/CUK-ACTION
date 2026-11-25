@@ -2,11 +2,7 @@
 from pathlib import Path
 import re
 from playwright.sync_api import sync_playwright, expect
-
-def enter(page, name='학생 A'):
-    if page.get_by_role('button', name='테스트 공간 열기', exact=True).count(): page.get_by_role('button', name='테스트 공간 열기', exact=True).click()
-    page.get_by_role('button', name=name+'로 체험', exact=True).click()
-    expect(page.get_by_text('테스트 공간 / '+name, exact=False)).to_be_visible()
+from browser_helpers import BASE, enter_test as enter
 
 def stored(page):
     expect(page.locator('.data-status')).to_have_text('테스트 저장됨')
@@ -16,14 +12,15 @@ with sync_playwright() as p:
     context=browser.new_context(viewport={'width':1440,'height':1000},accept_downloads=True)
     page=context.new_page(); errors=[]
     page.on('pageerror',lambda e: errors.append(str(e)))
-    page.goto('http://127.0.0.1:5173/account.html'); page.wait_for_load_state('networkidle')
+    page.goto(BASE+'/account.html'); page.wait_for_load_state('networkidle')
     expect(page.get_by_text('계정 서버 설정이 필요합니다.',exact=False)).to_be_visible()
     page.screenshot(path='login-v2.png',full_page=True)
     enter(page)
     expect(page.get_by_role('button',name='담당자 대시보드',exact=True)).to_have_count(0)
-    page.get_by_role('button',name='프로필 설정',exact=True).click()
+    page.locator('.sidebar nav').get_by_role('button',name='내 정보',exact=True).click()
     page.get_by_role('button',name='시연 프로필 채우기').click()
-    page.get_by_role('button',name='프로필 저장',exact=True).click(); stored(page)
+    page.get_by_role('button',name='내 정보 저장',exact=True).click(); stored(page)
+    page.locator('.sidebar nav').get_by_role('button',name='홈',exact=True).click()
     page.get_by_role('button',name='[테스트] 학생 프로젝트 모집',exact=True).click()
     expect(page.locator('.condition .status-text.pass')).to_have_count(3)
     page.get_by_role('button',name='지원 준비 시작',exact=True).click()

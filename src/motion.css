@@ -89,7 +89,7 @@
   gap: 12px;
   padding: 48px 16px;
   color: var(--muted);
-  font-size: 13px;
+  font-size:var(--fs-body);
   text-align: center;
 }
 .loading-state::before {

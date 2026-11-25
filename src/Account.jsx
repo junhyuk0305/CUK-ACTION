@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ArrowRight, GraduationCap} from 'lucide-react';
+import {ArrowLeft, ArrowRight, GraduationCap} from 'lucide-react';
 import {supabase, isManager, loginIdFromEmail} from './backend.js';
 import {DEMO} from './demo.js';
 import {IdAuth} from './IdAuth.jsx';
@@ -104,7 +104,9 @@ function Login({onDemo}) {
     window.addEventListener('hashchange', sync);
     return () => window.removeEventListener('hashchange', sync);
   }, []);
-  return <div className="access-shell"><section className="access-intro">
+  // Back returns to the page the visitor came from on this site, or to the public home for a direct visit.
+  const back = () => { if (document.referrer.startsWith(location.origin + '/') && history.length > 1) history.back(); else location.href = '/'; };
+  return <div className="access-shell"><button className="back access-back" onClick={back}><ArrowLeft size={16}/>뒤로가기</button><section className="access-intro">
     <a className="brand" href="/"><GraduationCap/> CUK Action</a>
     <div><h1>가톨릭대학교 교내 공고</h1><p>로그인하면 내 공고와 작성 내용을 이어서 확인할 수 있습니다.</p></div>
   </section><main className="access-main"><section className="panel access-card">
@@ -113,6 +115,5 @@ function Login({onDemo}) {
     {DEMO && onDemo && <div className="test-entry direct-test"><span className="tag">테스트 데이터</span><div className="test-accounts">
       {testAccounts.map((u, i) => <button className={'button ' + (i ? 'secondary' : 'primary')} key={u.id} onClick={() => onDemo(u)}>{u.name}로 체험<ArrowRight size={16}/></button>)}
     </div></div>}
-    <a className="text-button" href="/">교내 공고로 돌아가기</a>
   </section></main></div>;
 }

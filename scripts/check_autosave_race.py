@@ -1,6 +1,7 @@
 """Delay activity requests in the test adapter to exercise concurrent edits/logout."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import BASE, finish_onboarding
 
 source=Path('src/gateway.js').read_text(encoding='utf-8').replace(
     'export async function recordActivity(noticeId,type,optionId,stepId){',
@@ -9,10 +10,11 @@ with sync_playwright() as p:
     browser=p.chromium.launch(channel='msedge',headless=True)
     page=browser.new_page()
     page.route('**/src/gateway.js*',lambda route: route.fulfill(status=200,content_type='application/javascript',body=source))
-    page.goto('http://127.0.0.1:5173/account.html'); page.wait_for_load_state('networkidle')
+    page.goto(BASE+'/account.html'); page.wait_for_load_state('networkidle')
     def enter():
         if page.get_by_role('button',name='테스트 공간 열기',exact=True).count(): page.get_by_role('button',name='테스트 공간 열기',exact=True).click()
         page.get_by_role('button',name='학생 A로 체험',exact=True).click()
+        finish_onboarding(page)
     enter()
     page.get_by_role('button',name='[테스트] 학생 프로젝트 모집',exact=True).click()
     page.get_by_role('button',name='지원 준비 시작',exact=True).click()

@@ -25,9 +25,9 @@ function QualificationInput({ field, profile, onEdit, disabled }) {
 
 function ClaimInput({ rule, qualification, claim, disabled, onChange, showInput }) {
   const status = qualification?.status;
-  if (status === 'verified') return <p><span className="tag">확인됨</span></p>;
+  if (status === 'verified') return <p><span className="tag green">확인됨</span></p>;
   return <>
-    {status === 'claimed' && <p><span className="tag">확인 대기</span></p>}
+    {status === 'claimed' && <p><span className="tag gray">확인 대기</span></p>}
     {status === 'rejected' && <p className="warning">담당자가 이 자격 신고를 반려했습니다. 설명을 보완해 다시 신고할 수 있습니다.</p>}
     {showInput && <>
       <label className="claim-check"><input type="checkbox" aria-label={rule.label + ' 충족함'} checked={!!claim} disabled={disabled}
@@ -141,8 +141,8 @@ export default function SiteApplication({ notice, profile, draft, row, qualifica
     catch (e) { setError(e.message); } finally { setBusy(false); }
   }
   return <><button className="back" onClick={goBack}><ArrowLeft size={16}/>공고 상세로</button>
-    <div className="page-heading"><div>{row && <span className="tag">{row.status === 'submitted' ? '제출 완료' : '신청 취소'}</span>}
-      <h1>{notice.title}</h1><p>신청서에는 가상 정보만 입력하세요.</p></div></div>
+    <div className="page-heading"><div>{row && <span className={'tag ' + (row.status === 'submitted' ? 'green' : 'gray')}>{row.status === 'submitted' ? '제출 완료' : '신청 취소'}</span>}
+      <h1>{notice.title}</h1><p className="help-text">신청서에는 가상 정보만 입력하세요.</p></div></div>
     {locked && <p className="warning">접수가 종료됐습니다.</p>}
     <form className="panel site-form" onChange={e => { const id=e.target.dataset.questionId; if(id) editedQuestions.current.add(id); }} onBlur={questionBlur} onSubmit={e => { e.preventDefault(); setError(''); setConfirming(true); }}>
       <h2>기본 정보</h2>{questions.some(q => q.type === 'profile') ? inputs(questions.filter(q => q.type === 'profile')) : <p>요청한 기본 정보가 없습니다.</p>}

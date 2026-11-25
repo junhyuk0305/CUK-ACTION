@@ -3,8 +3,8 @@ from pathlib import Path
 import re
 from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import BASE, enter_test
 
-BASE = 'http://127.0.0.1:5173'
 KEY = 'cuk-action-test-v2'
 NOTICE = '00000000-0000-4000-8000-000000000001'
 TITLE = '[테스트] 학생 프로젝트 모집'
@@ -35,8 +35,7 @@ with sync_playwright() as p:
     page.on('request', lambda req: backend_requests.append(req.url) if 'supabase' in (urlparse(req.url).hostname or '') else None)
     page.goto(BASE + '/account.html')
     page.wait_for_load_state('networkidle')
-    page.get_by_role('button', name='학생 A로 체험', exact=True).click()
-    expect(page.get_by_text('테스트 공간 / 학생 A', exact=False)).to_be_visible()
+    enter_test(page)
     navigate(page, '공고 탐색')
     expect(page.locator('.bundle-grid > button')).to_have_count(4)
     expect(page.locator('.notice-card')).to_have_count(8)

@@ -4,11 +4,11 @@
 .workflow-step {padding: 16px 0; border-top: 1px solid var(--line, #e4e8ef);}
 .workflow-step label {display: flex; gap: 10px; align-items: flex-start; font-weight: 600;}
 .workflow-step input {margin-top: 4px; flex-shrink: 0;}
-.workflow-step p {font-size: 13px; margin: 8px 0;}
+.workflow-step p {font-size:var(--fs-body); margin: 8px 0;}
 .workflow-step small {display: block; color: #627084; line-height: 1.6;}
 .workflow-fields input, .workflow-fields select {min-width: 0; max-width: 100%;}
 .workflow-metrics {margin-top: 24px;}
-.workflow-metrics table {width: 100%; min-width: 520px; border-collapse: collapse; font-size: 13px;}
+.workflow-metrics table {width: 100%; min-width: 520px; border-collapse: collapse; font-size:var(--fs-body);}
 .workflow-metrics th, .workflow-metrics td {padding: 12px 8px; text-align: left; border-bottom: 1px solid #e4e8ef;}
 .workflow-metrics .table-scroll {overflow-x: auto;}
 .detail-facts > span {white-space: normal;}

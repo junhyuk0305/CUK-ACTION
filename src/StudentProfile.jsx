@@ -7,16 +7,17 @@ import { savedProfile } from './student-profile.js';
 import { SiteRecordStatus } from './SiteRecords.jsx';
 
 const qualificationTags = { verified: '확인됨', claimed: '확인 대기', rejected: '반려' };
+const qualificationColors = { verified: 'green', claimed: 'gray', rejected: 'red' };
 
 function QualificationList({ title, items, status, hideEmpty }) {
   const rows = items.filter(item => item.status === status);
   if (hideEmpty && !rows.length) return null;
   return <section className="panel"><h2>{title}</h2>
-    {status === 'rejected' && <p className="muted">공고 신청서에서 설명을 보완해 다시 신고할 수 있습니다.</p>}
+    {status === 'rejected' && <p className="help-text">공고 신청서에서 설명을 보완해 다시 신고할 수 있습니다.</p>}
     {rows.length ? <ul>{rows.map(item => <li key={item.qualification_id}>
-      <strong>{item.qualifications?.name || '공고 자격'}</strong> <span className="tag">{qualificationTags[status]}</span>
+      <strong>{item.qualifications?.name || '공고 자격'}</strong> <span className={'tag ' + qualificationColors[status]}>{qualificationTags[status]}</span>
       {item.note && <p>{item.note}</p>}
-    </li>)}</ul> : <p className="muted">{title}이 없습니다.</p>}
+    </li>)}</ul> : <p className="help-text">{title}이 없습니다.</p>}
   </section>;
 }
 
@@ -50,7 +51,7 @@ export default function StudentProfile({ profile, onboarding=false, busy=false, 
           <label>재학 상태 (필수)<select required value={p.status ?? ''} onChange={e => set('status', e.target.value)}>
             <option value="">선택</option>{[...new Set(['재학','휴학','졸업',...(p.status ? [p.status] : [])])].map(v => <option key={v}>{v}</option>)}</select></label>
         </div>
-        {optional && <><p className="muted">이름, 학번, 연락처에는 가상 정보를 입력하세요.</p><p className="muted">사이트에서 신청서를 제출하면 공고 담당자가 제출 시점의 기본 정보와 자격 정보를 확인합니다.</p><div className="profile-fields">
+        {optional && <><p className="help-text">이름, 학번, 연락처에는 가상 정보를 입력하세요. 사이트에서 신청서를 제출하면 공고 담당자가 제출 시점의 기본 정보와 자격 정보를 확인합니다.</p><div className="profile-fields">
           <label>이름 또는 별명<input maxLength={20} value={p.name ?? ''} onChange={e => set('name', e.target.value)} /></label>
           <label>학번<input maxLength={30} value={p.studentNo ?? ''} onChange={e => set('studentNo', e.target.value)} /></label>
           <label>연락처<input type="tel" maxLength={30} value={p.phone ?? ''} onChange={e => set('phone', e.target.value)} /></label>

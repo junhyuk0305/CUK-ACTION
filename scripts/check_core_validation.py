@@ -4,7 +4,7 @@ import json
 import re
 from playwright.sync_api import sync_playwright, expect
 
-BASE = 'http://127.0.0.1:5173'
+from browser_helpers import BASE, finish_onboarding
 OUT = Path('tmp/browser-checks')
 OUT.mkdir(parents=True, exist_ok=True)
 CU12 = '[흐름 테스트] CU12 과목 선택'
@@ -14,6 +14,7 @@ DORM = '[검수 연습] K/A관 입사까지'
 
 def enter(page, name):
     page.get_by_role('button', name=name + '로 체험', exact=True).click()
+    if name.startswith('학생'): finish_onboarding(page)
 
 
 def leave(page):
@@ -23,6 +24,17 @@ def leave(page):
 
 def saved(page):
     expect(page.locator('.data-status')).to_have_text('테스트 저장됨')
+
+
+def edit_profile(page, entry, semester, year=None):
+    # Profile edits happen on the 내 정보 page; the CU12 detail is reopened on the other-university option.
+    entry.click()
+    if year: page.get_by_role('combobox', name='학년 (필수)', exact=True).select_option(year)
+    page.get_by_role('combobox', name='현재 학년의 학기', exact=True).select_option(semester)
+    page.get_by_role('button', name='내 정보 저장', exact=True).click()
+    saved(page)
+    page.locator('.sidebar nav').get_by_role('button', name='홈', exact=True).click()
+    page.get_by_role('button', name=CU12, exact=True).click()
 
 
 with sync_playwright() as p:
@@ -48,6 +60,8 @@ with sync_playwright() as p:
         page.locator('.manager-template-details summary').click()
         page.get_by_label('검수 초안 선택', exact=True).select_option(label=title)
         page.get_by_role('button', name='초안 불러오기', exact=True).click()
+        # Imported drafts come from school notices, so they open as external-link notices.
+        expect(page.get_by_role('radio', name='외부 링크 신청', exact=True)).to_be_checked()
         if title == CU12:
             expect(page.get_by_label('항목 1 CU12 개설 대학', exact=True)).to_have_value('home')
             expect(page.get_by_label('항목 2 CU12 개설 대학', exact=True)).to_have_value('other')
@@ -57,25 +71,17 @@ with sync_playwright() as p:
         page.get_by_role('button', name='공고 관리로', exact=True).first.click()
     leave(page)
     enter(page, '학생 A')
-    page.get_by_role('button', name='프로필 설정', exact=True).click()
-    page.get_by_role('combobox', name='학년', exact=True).select_option('4')
-    page.get_by_role('combobox', name='현재 학년의 학기', exact=True).select_option('2')
-    page.get_by_role('button', name='프로필 저장', exact=True).click()
-    saved(page)
-    page.get_by_role('button', name=CU12, exact=True).click()
+    edit_profile(page, page.locator('.sidebar nav').get_by_role('button', name='내 정보', exact=True), '2', year='4')
     expect(page.locator('.condition .status-text.pass')).to_have_count(1)
     expect(page.locator('.condition .status-text.unknown')).to_have_count(1)
     page.get_by_role('button', name='타 대학 과목 / 가상 제한 검사', exact=True).click()
     expect(page.locator('.condition .status-text.fail')).to_have_count(1)
-    page.get_by_role('button', name='프로필 설정', exact=True).click()
-    page.get_by_role('combobox', name='현재 학년의 학기', exact=True).select_option('')
-    page.get_by_role('button', name='프로필 저장', exact=True).click()
-    saved(page)
+    profile_link = lambda: page.locator('.section-heading').get_by_role('button', name='내 정보', exact=True)
+    edit_profile(page, profile_link(), '')
+    page.get_by_role('button', name='타 대학 과목 / 가상 제한 검사', exact=True).click()
     expect(page.locator('.condition .status-text.unknown')).to_have_count(2)
-    page.get_by_role('button', name='프로필 설정', exact=True).click()
-    page.get_by_role('combobox', name='현재 학년의 학기', exact=True).select_option('1')
-    page.get_by_role('button', name='프로필 저장', exact=True).click()
-    saved(page)
+    edit_profile(page, profile_link(), '1')
+    page.get_by_role('button', name='타 대학 과목 / 가상 제한 검사', exact=True).click()
     expect(page.locator('.condition .status-text.pass')).to_have_count(1)
     page.reload()
     page.wait_for_load_state('networkidle')

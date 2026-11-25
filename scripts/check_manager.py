@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 from playwright.sync_api import sync_playwright, expect
 
-BASE = 'http://127.0.0.1:5173'
+from browser_helpers import BASE, finish_onboarding
 TITLE = '[테스트 검증] 담당자 게시 흐름'
 screenshots = Path('tmp/browser-checks')
 screenshots.mkdir(parents=True, exist_ok=True)
@@ -23,6 +23,7 @@ def enter(page, account):
     if page.get_by_role('button', name='테스트 공간 열기', exact=True).count():
         page.get_by_role('button', name='테스트 공간 열기', exact=True).click()
     page.get_by_role('button', name=account + '로 체험', exact=True).click()
+    if account.startswith('학생'): finish_onboarding(page)
     expect(page.get_by_role('button', name='테스트 종료', exact=True)).to_be_visible()
 
 
@@ -66,6 +67,8 @@ with sync_playwright() as p:
     # The save bar sits at the end of the form; only the publish button floats in view.
     save_box = page.get_by_role('button', name='검수 후 게시', exact=True).bounding_box()
     assert save_box['y'] + save_box['height'] <= 1000, 'publish action visible without scrolling'
+    # New notices default to site intake; this flow checks the external-link preparation notice.
+    page.get_by_role('radio', name='외부 링크 신청', exact=True).check()
     page.get_by_label('공고 제목', exact=True).fill(TITLE)
     page.get_by_role('button', name='임시저장', exact=True).click()
     expect(page.locator('.manager-workspace .success-note')).to_contain_text('임시저장했습니다')
@@ -86,7 +89,7 @@ with sync_playwright() as p:
     page.get_by_label('준비 체크리스트', exact=False).fill('지원 동기 작성\n필수 서류 확인')
     page.get_by_role('button', name='문항 추가', exact=True).click()
     page.get_by_label('문항 제목', exact=True).fill('지원 동기')
-    page.get_by_label('최대 글자 수', exact=True).fill('1000')
+    page.get_by_label('최대 글자 수', exact=False).fill('1000')
     page.get_by_label('작성 안내', exact=True).fill('본인의 지원 동기를 직접 적으세요.')
     page.get_by_label('신청 후 확인할 일', exact=True).fill('공식 원문에서 결과 발표와 추가 서류를 확인하세요.')
     expect(page.get_by_role('button', name='검수 후 게시', exact=True)).to_be_disabled()
@@ -176,7 +179,8 @@ with sync_playwright() as p:
     page.get_by_label('검수 초안 선택', exact=True).select_option('0')
     page.get_by_role('button', name='초안 불러오기', exact=True).click()
     expect(page.get_by_label('공고 제목', exact=True)).to_have_value('[취업지원팀] 2026학년도 동계 직무 부트캠프 안내(현직자 멘토와 직무 경험)')
-    expect(page.get_by_label('원문과 조건, 마감, 신청 경로를 대조했습니다.', exact=True)).not_to_be_checked()
+    # The review checkbox label depends on the apply mode the imported draft opens in.
+    expect(page.locator('.manager-review').get_by_role('checkbox')).not_to_be_checked()
     expect(page.get_by_label('신청 경로 주소', exact=False)).to_have_value('')
     expect(page.get_by_text('공고 HTML 본문 발췌', exact=True)).to_be_visible()
     expect(page.get_by_text('원문 확인일 2026-11-16', exact=True)).to_be_visible()

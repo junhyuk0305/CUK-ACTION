@@ -24,7 +24,7 @@ export default function QualificationPicker({value, testMode, onPick}) {
     } catch (e) {setError(e.message);} finally {setBusy(false);}
   }
 
-  if (testMode) return <p className="info-note manager-wide">테스트 공간에서는 직접 만든 자격을 쓸 수 없습니다. 담당자 계정으로 로그인하세요.</p>;
+  if (testMode) return <p className="help-text manager-wide">테스트 공간에서는 직접 만든 자격을 쓸 수 없습니다. 담당자 계정으로 로그인하세요.</p>;
   const selected = list?.find(q => q.id === value);
   return <>
     <label>자격<select value={selected ? value : ''} disabled={!list} onChange={event => onPick(list.find(q => q.id === event.target.value))} required>
